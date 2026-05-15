@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frak Finance · Reddit Operational Dashboard</title>
+<style>
+:root{
+  --frak-dark:#121C27;
+  --frak-navy:#102B3F;
+  --frak-slate:#252E38;
+  --frak-mid:#363E48;
+  --frak-light:#D5DCDE;
+  --white:#FFFFFF;
+  --n0:#FAFBFC;
+  --n1:#F1F4F6;
+  --n2:#E4E9EC;
+  --n3:#C9D1D6;
+  --n4:#9BA6AE;
+  --n5:#6B7680;
+  --n6:#4A5560;
+  --n7:#2F3942;
+  --n8:#1F2832;
+  --n9:#121C27;
+  --ok:#1F8A5C;
+  --ok-bg:#E8F4ED;
+  --ok-soft:#C5E5D3;
+  --warn:#B8741A;
+  --warn-bg:#FBF1E0;
+  --warn-soft:#F4D8A4;
+  --risk:#A4393A;
+  --risk-bg:#FAEAEA;
+  --risk-soft:#EDB9B9;
+  --info:#2C5E85;
+  --info-bg:#E7F0F7;
+  --accent:#C9A84C;
+  --accent-bg:#FAF5E8;
+
+  --shadow-sm:0 1px 2px rgba(18,28,39,.04),0 1px 3px rgba(18,28,39,.06);
+  --shadow-md:0 2px 4px rgba(18,28,39,.06),0 4px 12px rgba(18,28,39,.08);
+  --shadow-lg:0 8px 24px rgba(18,28,39,.10),0 16px 40px rgba(18,28,39,.08);
+  --shadow-xl:0 24px 48px rgba(18,28,39,.14),0 12px 24px rgba(18,28,39,.10);
+
+  --radius-sm:6px;
+  --radius:10px;
+  --radius-lg:14px;
+  --radius-xl:18px;
+
+  --t-fast:120ms cubic-bezier(.4,0,.2,1);
+  --t:200ms cubic-bezier(.4,0,.2,1);
+  --t-slow:320ms cubic-bezier(.4,0,.2,1);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--n1);color:var(--n8);line-height:1.55;font-size:14px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.mono{font-family:'JetBrains Mono','SF Mono',Consolas,monospace}
+
+/* ============ APP SHELL ============ */
+.app{max-width:1380px;margin:0 auto;background:var(--white);min-height:100vh;box-shadow:0 0 100px rgba(18,28,39,.08);position:relative}
+
+/* ============ TOP BAR ============ */
+.topbar{padding:18px 44px;background:var(--frak-dark);color:#fff;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.04)}
+.tb-brand{display:flex;align-items:center;gap:14px}
+.tb-logo{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--frak-dark);font-size:18px;letter-spacing:-1px}
+.tb-name{font-size:14px;font-weight:700;letter-spacing:.2px}
+.tb-name span{display:block;font-size:10px;font-weight:500;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;margin-top:1px}
+.tb-actions{display:flex;align-items:center;gap:10px}
+.tb-status{display:flex;align-items:center;gap:8px;padding:7px 12px;background:rgba(255,255,255,.04);border-radius:6px;font-size:11px;color:rgba(255,255,255,.7)}
+.tb-status-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px rgba(201,168,76,.2);animation:pulse 2.4s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(201,168,76,.2)}50%{box-shadow:0 0 0 6px rgba(201,168,76,.08)}}
+.tb-btn{padding:9px 16px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;transition:all var(--t);border:none;display:flex;align-items:center;gap:7px;letter-spacing:.1px}
+.tb-btn.primary{background:var(--accent);color:var(--frak-dark)}
+.tb-btn.primary:hover{background:#d4b562;transform:translateY(-1px);box-shadow:0 4px 12px rgba(201,168,76,.3)}
+.tb-btn.ghost{background:rgba(255,255,255,.06);color:rgba(255,255,255,.85)}
+.tb-btn.ghost:hover{background:rgba(255,255,255,.12)}
+.tb-btn svg{width:14px;height:14px}
+
+/* ============ HERO ============ */
+.hero{padding:36px 44px 30px;background:linear-gradient(135deg,#121C27 0%,#102B3F 55%,#1a3b54 100%);color:#fff;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50%;right:-10%;width:600px;height:600px;background:radial-gradient(circle,rgba(201,168,76,.06) 0%,transparent 70%);pointer-events:none}
+.hero-c{position:relative;z-index:1}
+.hero-ey{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:3px;color:var(--accent);margin-bottom:10px}
+.hero h1{font-size:28px;font-weight:800;letter-spacing:-.5px;line-height:1.2;margin-bottom:6px}
+.hero h1 span{color:#9DB3C4;font-weight:600}
+.hero-s{font-size:13px;opacity:.72;line-height:1.6;max-width:920px}
+
+.hm-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:22px}
+.hm-box{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px 14px;backdrop-filter:blur(8px);transition:all var(--t);position:relative;overflow:hidden}
+.hm-box:hover{background:rgba(255,255,255,.07);transform:translateY(-2px);border-color:rgba(255,255,255,.12)}
+.hm-box.cur{background:linear-gradient(135deg,rgba(201,168,76,.18) 0%,rgba(201,168,76,.06) 100%);border-color:rgba(201,168,76,.3)}
+.hm-l{font-size:8.5px;text-transform:uppercase;letter-spacing:1.4px;opacity:.55;margin-bottom:6px;font-weight:600}
+.hm-v{font-size:19px;font-weight:800;line-height:1.15;letter-spacing:-.4px}
+.hm-v.mono{font-size:17px;font-weight:700;letter-spacing:0}
+.hm-sub{font-size:9.5px;opacity:.55;margin-top:4px;line-height:1.4}
+.hm-tag{display:inline-block;font-size:8px;font-weight:700;padding:3px 7px;border-radius:3px;margin-top:6px;text-transform:uppercase;letter-spacing:.6px}
+.hm-tag.active{background:rgba(201,168,76,.22);color:var(--accent)}
+.hm-tag.holding{background:rgba(155,166,174,.18);color:#c9d1d6}
+.hm-tag.ready{background:rgba(125,150,180,.22);color:#a8c5e2}
+.hm-tag.ok{background:rgba(31,138,92,.22);color:#7fd4a9}
+.hm-tag.warn{background:rgba(184,116,26,.25);color:#f4cb87}
+
+/* ============ TABS ============ */
+.tb{display:flex;background:#0a1622;padding:0 44px;gap:0;overflow-x:auto;border-bottom:1px solid rgba(255,255,255,.04);position:sticky;top:0;z-index:50}
+.tb-b{padding:14px 22px;background:transparent;color:rgba(255,255,255,.5);font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all var(--t);border-bottom:2px solid transparent;letter-spacing:.2px;display:flex;align-items:center;gap:10px}
+.tb-b .tb-n{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;opacity:.45;letter-spacing:.5px}
+.tb-b:hover{color:rgba(255,255,255,.85);background:rgba(255,255,255,.04)}
+.tb-b.act{color:#fff;background:rgba(255,255,255,.04);border-bottom-color:var(--accent)}
+.tb-b.act .tb-n{color:var(--accent);opacity:1}
+.tc{display:none;animation:fadeIn .35s ease}
+.tc.act{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ============ SECTIONS ============ */
+.sec{padding:40px 44px}
+.sec.alt{background:var(--n0)}
+.sd{display:flex;align-items:flex-start;gap:14px;margin-bottom:24px}
+.sn{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--frak-navy);background:var(--n1);border:1px solid var(--n2);padding:5px 10px;border-radius:6px;margin-top:2px;flex-shrink:0}
+.st{font-size:19px;font-weight:700;color:var(--n9);line-height:1.3;letter-spacing:-.3px}
+.ss{font-size:12px;color:var(--n5);margin-top:4px;line-height:1.55;max-width:780px}
+
+/* ============ CALLOUTS ============ */
+.explain{background:var(--n1);border-left:3px solid var(--frak-navy);border-radius:0 var(--radius) var(--radius) 0;padding:16px 20px;margin-top:18px}
+.explain-t{font-size:9px;font-weight:700;color:var(--frak-navy);margin-bottom:6px;text-transform:uppercase;letter-spacing:1.3px}
+.explain-b{font-size:12px;color:var(--n7);line-height:1.6}
+.explain-b strong{color:var(--n9);font-weight:600}
+.explain.warn{background:var(--warn-bg);border-left-color:var(--warn)}
+.explain.warn .explain-t{color:var(--warn)}
+.explain.ok{background:var(--ok-bg);border-left-color:var(--ok)}
+.explain.ok .explain-t{color:var(--ok)}
+.explain.risk{background:var(--risk-bg);border-left-color:var(--risk)}
+.explain.risk .explain-t{color:var(--risk)}
+
+/* ============ GRIDS ============ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.g23{display:grid;grid-template-columns:2fr 3fr;gap:20px}
+.g32{display:grid;grid-template-columns:3fr 2fr;gap:20px}
+
+/* ============ CARDS ============ */
+.cd{background:var(--white);border:1px solid var(--n2);border-radius:var(--radius);overflow:hidden;transition:all var(--t)}
+.cd:hover{box-shadow:var(--shadow-md);border-color:var(--n3)}
+.ch{padding:13px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--n2)}
+.ch.nv{background:var(--frak-navy);color:#fff;border-bottom-color:var(--frak-navy)}
+.ch.dk{background:var(--frak-dark);color:#fff;border-bottom-color:var(--frak-dark)}
+.ch.gd{background:var(--accent);color:var(--frak-dark);border-bottom-color:var(--accent)}
+.ch.ok{background:var(--ok);color:#fff;border-bottom-color:var(--ok)}
+.ch.wn{background:var(--warn);color:#fff;border-bottom-color:var(--warn)}
+.ch.rk{background:var(--risk);color:#fff;border-bottom-color:var(--risk)}
+.ct{font-size:9px;text-transform:uppercase;letter-spacing:1.3px;opacity:.85;font-weight:600}
+.cn{font-size:13px;font-weight:700;letter-spacing:-.1px}
+.cb{padding:18px}
+.ci{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--n1);font-size:12px;color:var(--n7);gap:8px}
+.ci:last-child{border-bottom:none}
+.ci-l{color:var(--n6)}
+.ci-r{font-weight:600;color:var(--n8);font-family:'JetBrains Mono',monospace;font-size:11.5px}
+
+/* ============ TAGS ============ */
+.tg{font-size:8px;font-weight:700;padding:3px 8px;border-radius:3px;text-transform:uppercase;letter-spacing:.6px;display:inline-block;white-space:nowrap}
+.tg-go{background:#D8EFE2;color:#0F5C3D}
+.tg-wa{background:#F8E8C9;color:#8B5212}
+.tg-hl{background:#F4D5D5;color:#7A2828}
+.tg-nx{background:#E0E9F0;color:#1F4A6F}
+.tg-pr{background:#E2D9F0;color:#4A3878}
+.tg-info{background:var(--info-bg);color:var(--info)}
+
+/* ============ MISSION CONTROL HERO ============ */
+.mc-hero{background:linear-gradient(135deg,var(--frak-navy) 0%,var(--frak-slate) 100%);border-radius:var(--radius-lg);padding:28px 32px;color:#fff;margin-bottom:24px;position:relative;overflow:hidden;box-shadow:var(--shadow-lg)}
+.mc-hero::after{content:'';position:absolute;top:-30%;right:-10%;width:400px;height:400px;background:radial-gradient(circle,rgba(201,168,76,.08) 0%,transparent 60%)}
+.mc-eyebrow{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;color:var(--accent);margin-bottom:10px;position:relative;z-index:1}
+.mc-title{font-size:24px;font-weight:800;margin-bottom:8px;line-height:1.25;letter-spacing:-.4px;position:relative;z-index:1}
+.mc-sub{font-size:12.5px;color:rgba(255,255,255,.72);max-width:760px;line-height:1.6;position:relative;z-index:1}
+.mc-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px;position:relative;z-index:1}
+.mc-stat{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);border-radius:9px;padding:14px 15px;backdrop-filter:blur(8px);transition:all var(--t)}
+.mc-stat:hover{background:rgba(255,255,255,.09)}
+.mc-stat-l{font-size:9px;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:1.3px;font-weight:600}
+.mc-stat-v{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;margin-top:6px;letter-spacing:-.4px;line-height:1.1}
+.mc-stat-s{font-size:10px;color:rgba(255,255,255,.5);margin-top:4px;line-height:1.45}
+
+/* ============ PHASE RAIL ============ */
+.phase-rail{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:8px}
+.phase-cell{background:var(--white);border:1px solid var(--n2);border-radius:var(--radius);padding:14px 14px;transition:all var(--t);cursor:default;position:relative;overflow:hidden}
+.phase-cell:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--n3)}
+.phase-cell.cur{background:var(--frak-navy);color:#fff;border-color:var(--frak-navy);box-shadow:var(--shadow-md)}
+.phase-cell.cur .phase-w{color:var(--accent)}
+.phase-cell.cur .phase-n{color:rgba(255,255,255,.7)}
+.phase-cell.done{background:var(--ok-bg);border-color:var(--ok-soft)}
+.phase-cell.done .phase-w{color:var(--ok)}
+.phase-cell.done::before{content:'✓';position:absolute;top:10px;right:12px;color:var(--ok);font-weight:700;font-size:13px}
+.phase-w{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;color:var(--n5);text-transform:uppercase;letter-spacing:.8px}
+.phase-l{font-size:13px;font-weight:700;color:var(--n9);margin:4px 0 4px;letter-spacing:-.1px}
+.phase-cell.cur .phase-l{color:#fff}
+.phase-n{font-size:10.5px;color:var(--n5);line-height:1.45}
+
+/* ============ WEEK PANEL ============ */
+.week-panel{background:var(--frak-dark);color:#fff;border-radius:var(--radius-lg);padding:24px 26px;margin-bottom:20px;position:relative;overflow:hidden;box-shadow:var(--shadow-lg)}
+.week-panel::before{content:'';position:absolute;top:0;right:0;width:280px;height:100%;background:linear-gradient(90deg,transparent 0%,rgba(201,168,76,.04) 100%);pointer-events:none}
+.week-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:18px;position:relative;z-index:1}
+.week-title{font-size:15px;font-weight:800;letter-spacing:-.2px}
+.week-title span{color:var(--accent)}
+.week-meta{font-size:10px;color:rgba(255,255,255,.5);font-family:'JetBrains Mono',monospace;letter-spacing:.5px}
+.week-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;position:relative;z-index:1}
+.week-col h4{font-size:9px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1.3px;margin-bottom:11px}
+.week-col ul{list-style:none}
+.week-col li{font-size:11.5px;color:rgba(255,255,255,.82);padding:5px 0;line-height:1.55;position:relative;padding-left:16px}
+.week-col li::before{content:'→';position:absolute;left:0;color:var(--accent);font-weight:700}
+
+/* ============ BARS ============ */
+.bar-row{display:grid;grid-template-columns:140px 1fr 70px;gap:12px;align-items:center;padding:8px 0;font-size:11.5px}
+.bar-label{color:var(--n6);font-weight:500}
+.bar-track{height:10px;background:var(--n2);border-radius:5px;overflow:hidden;position:relative}
+.bar-fill{height:100%;border-radius:5px;background:var(--frak-navy);transition:width 800ms cubic-bezier(.4,0,.2,1)}
+.bar-fill.ok{background:var(--ok)}
+.bar-fill.warn{background:var(--warn)}
+.bar-fill.risk{background:var(--risk)}
+.bar-fill.gd{background:var(--accent)}
+.bar-val{text-align:right;font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:700;color:var(--n8)}
+
+/* ============ SIGNALS ============ */
+.sig{display:flex;gap:14px;padding:13px 16px;border:1px solid var(--n2);border-radius:9px;background:var(--white);margin-bottom:8px;align-items:center;transition:all var(--t)}
+.sig:hover{border-color:var(--n3);transform:translateX(2px)}
+.sig-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.sig-dot.ok{background:var(--ok);box-shadow:0 0 0 4px rgba(31,138,92,.15)}
+.sig-dot.warn{background:var(--warn);box-shadow:0 0 0 4px rgba(184,116,26,.15)}
+.sig-dot.risk{background:var(--risk);box-shadow:0 0 0 4px rgba(164,57,58,.15)}
+.sig-dot.info{background:var(--info);box-shadow:0 0 0 4px rgba(44,94,133,.15)}
+.sig-body{flex:1}
+.sig-t{font-size:12px;font-weight:700;color:var(--n9)}
+.sig-d{font-size:11px;color:var(--n6);margin-top:2px;line-height:1.5}
+
+/* ============ TIMELINE TAB 2 ============ */
+.timeline{position:relative;padding:18px 0 10px}
+.tl-track{position:absolute;left:6%;right:6%;top:46px;height:2px;background:var(--n2);z-index:0}
+.tl-fill{position:absolute;left:6%;top:46px;height:2px;background:var(--frak-navy);z-index:1;width:0%;transition:width 800ms ease}
+.tl-rail{display:grid;grid-template-columns:repeat(8,1fr);position:relative;z-index:2}
+.tl-week{text-align:center;position:relative}
+.tl-dot{width:20px;height:20px;border-radius:50%;background:var(--n2);border:3px solid #fff;margin:28px auto 10px;position:relative;z-index:2;transition:all var(--t);box-shadow:var(--shadow-sm)}
+.tl-week.cur .tl-dot{background:var(--frak-navy);box-shadow:0 0 0 5px rgba(16,43,63,.18)}
+.tl-week.done .tl-dot{background:var(--ok)}
+.tl-w{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;color:var(--n5);text-transform:uppercase;letter-spacing:.6px}
+.tl-l{font-size:11px;font-weight:600;color:var(--n7);margin-top:3px;line-height:1.3}
+.tl-week.cur .tl-l{color:var(--frak-navy);font-weight:700}
+
+.phase-card{border:1px solid var(--n2);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:16px;background:var(--white);transition:all var(--t)}
+.phase-card.cur{border-color:var(--frak-navy);box-shadow:var(--shadow-lg)}
+.phase-card:hover:not(.cur){box-shadow:var(--shadow-md)}
+.phase-hd{padding:16px 22px;display:flex;align-items:center;justify-content:space-between;background:var(--n1);border-bottom:1px solid var(--n2)}
+.phase-card.cur .phase-hd{background:var(--frak-navy);color:#fff;border-bottom-color:var(--frak-navy)}
+.phase-hd-l{display:flex;align-items:center;gap:16px}
+.phase-num{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;background:rgba(0,0,0,.08);padding:5px 10px;border-radius:5px;letter-spacing:.5px}
+.phase-card.cur .phase-num{background:rgba(255,255,255,.15);color:var(--accent)}
+.phase-hd-title{font-size:15px;font-weight:700;letter-spacing:-.2px}
+.phase-hd-sub{font-size:11px;opacity:.65;font-family:'JetBrains Mono',monospace;margin-top:2px}
+.phase-body{padding:22px}
+.phase-cols{display:grid;grid-template-columns:2fr 3fr 2fr;gap:24px}
+.phase-col h5{font-size:9px;font-weight:700;color:var(--n5);text-transform:uppercase;letter-spacing:1.3px;margin-bottom:12px}
+.task-list{list-style:none}
+.task-list li{padding:6px 0 6px 24px;font-size:11.5px;color:var(--n7);line-height:1.55;position:relative;transition:all var(--t-fast)}
+.task-list li::before{content:'';position:absolute;left:0;top:9px;width:15px;height:15px;border:1.5px solid var(--n3);border-radius:4px;background:var(--white);transition:all var(--t)}
+.task-list.do li{cursor:pointer}
+.task-list.do li:hover::before{border-color:var(--frak-navy)}
+.task-list.do li.checked::before{background:var(--ok);border-color:var(--ok)}
+.task-list.do li.checked::after{content:'✓';position:absolute;left:3px;top:5px;color:#fff;font-size:11px;font-weight:700}
+.task-list.do li.checked{color:var(--n5);text-decoration:line-through;text-decoration-color:var(--n3)}
+.goal-pod{background:var(--n1);border:1px solid var(--n2);border-radius:var(--radius);padding:14px 16px}
+.goal-pod-l{font-size:9px;font-weight:700;color:var(--n5);text-transform:uppercase;letter-spacing:1.3px;margin-bottom:7px}
+.goal-pod-v{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:800;color:var(--frak-navy);line-height:1.1;letter-spacing:-.5px}
+.goal-pod-s{font-size:11px;color:var(--n6);margin-top:6px;line-height:1.5}
+.phase-card.cur .goal-pod{background:rgba(201,168,76,.10);border-color:rgba(201,168,76,.35)}
+.phase-card.cur .goal-pod-v{color:var(--accent)}
+
+/* ============ SUBREDDIT MATRIX ============ */
+.matrix{background:var(--white);border:1px solid var(--n2);border-radius:var(--radius);overflow:hidden;margin-bottom:18px;transition:all var(--t)}
+.matrix:hover{box-shadow:var(--shadow-md)}
+.mx-hd{padding:13px 18px;background:var(--frak-navy);color:#fff;display:flex;justify-content:space-between;align-items:center}
+.mx-title{font-size:12.5px;font-weight:700;letter-spacing:-.1px}
+.mx-meta{font-size:10px;color:rgba(255,255,255,.6);font-family:'JetBrains Mono',monospace;letter-spacing:.3px}
+.mx-table{width:100%;border-collapse:collapse;font-size:11.5px}
+.mx-table th{background:var(--n1);color:var(--n7);padding:11px 14px;text-align:left;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--n2);white-space:nowrap}
+.mx-table td{padding:12px 14px;border-bottom:1px solid var(--n1);vertical-align:middle;color:var(--n7);line-height:1.45;transition:background var(--t-fast)}
+.mx-table tr:last-child td{border-bottom:none}
+.mx-table tr:hover td{background:var(--n0)}
+.sub-name{font-weight:700;color:var(--frak-navy);font-family:'JetBrains Mono',monospace;font-size:11.5px}
+.sz{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--n6);font-weight:600}
+
+.heat{display:inline-block;width:50px;text-align:center;padding:4px 7px;border-radius:4px;font-size:9.5px;font-weight:700;color:#fff;font-family:'JetBrains Mono',monospace;letter-spacing:.2px}
+.heat-5{background:#0F5C3D}
+.heat-4{background:#1F8A5C}
+.heat-3{background:#B8741A}
+.heat-2{background:#A4393A}
+.heat-1{background:#6B7680}
+
+.pri-bar{display:inline-flex;align-items:center;gap:2px;height:12px}
+.pri-pip{width:5px;background:var(--n2);border-radius:1px;height:100%}
+.pri-pip.on{background:var(--frak-navy)}
+.pri-pip.on.hi{background:var(--accent)}
+
+/* ============ CONTENT ENGINE ============ */
+.pillar-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:22px}
+.pillar{background:var(--white);border:1px solid var(--n2);border-radius:var(--radius);padding:16px 14px;border-top:3px solid var(--frak-navy);transition:all var(--t);cursor:default}
+.pillar:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.pillar:nth-child(1){border-top-color:#2C5E85}
+.pillar:nth-child(2){border-top-color:var(--frak-navy)}
+.pillar:nth-child(3){border-top-color:#1F8A5C}
+.pillar:nth-child(4){border-top-color:var(--accent)}
+.pillar:nth-child(5){border-top-color:#7A4FA8}
+.pillar-n{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:var(--n5);text-transform:uppercase;letter-spacing:.8px}
+.pillar-t{font-size:12.5px;font-weight:700;color:var(--n9);margin:6px 0 7px;line-height:1.3;letter-spacing:-.1px}
+.pillar-d{font-size:10.5px;color:var(--n6);line-height:1.55}
+.pillar-sub{margin-top:11px;padding-top:11px;border-top:1px solid var(--n1)}
+.pillar-sub-l{font-size:8px;font-weight:700;color:var(--n5);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.pillar-sub-v{font-size:10px;color:var(--n7);line-height:1.5}
+.pillar-sub-v strong{color:var(--frak-navy)}
+
+.ex-block{background:var(--frak-dark);border-radius:var(--radius-lg);padding:26px 28px;color:#fff;margin-bottom:16px;position:relative;overflow:hidden;box-shadow:var(--shadow-lg)}
+.ex-h{font-size:9px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:2px;margin-bottom:14px}
+.ex-prompt{background:rgba(255,255,255,.05);border-left:3px solid var(--accent);padding:13px 16px;border-radius:0 7px 7px 0;margin-bottom:16px;font-size:12.5px;font-style:italic;color:rgba(255,255,255,.85);line-height:1.6}
+.ex-body{font-size:13px;color:rgba(255,255,255,.9);line-height:1.7;background:rgba(255,255,255,.04);padding:16px 18px;border-radius:8px;border:1px solid rgba(255,255,255,.06)}
+.ex-body p{margin-bottom:10px}
+.ex-body p:last-child{margin-bottom:0}
+.ex-why{margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.ex-why-c{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:7px;padding:11px 13px}
+.ex-why-l{font-size:8.5px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.ex-why-v{font-size:11px;color:rgba(255,255,255,.82);line-height:1.5}
+
+.fmt-row{display:grid;grid-template-columns:130px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--n1);align-items:start}
+.fmt-row:last-child{border-bottom:none}
+.fmt-tag{background:var(--frak-navy);color:#fff;padding:6px 10px;border-radius:5px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;text-align:center}
+.fmt-tag.alt2{background:#2C5E85}
+.fmt-tag.alt3{background:#1F8A5C}
+.fmt-tag.alt4{background:var(--accent);color:var(--frak-dark)}
+.fmt-row strong{color:var(--frak-navy);font-weight:600}
+.fmt-row .fmt-d{font-size:11.5px;color:var(--n7);line-height:1.6}
+
+/* ============ RULES & RISKS ============ */
+.rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
+.rules-card{border-radius:var(--radius-lg);padding:22px 24px;border-left:4px solid;background:var(--white);transition:all var(--t)}
+.rules-card:hover{box-shadow:var(--shadow-md)}
+.rules-card.do{background:var(--ok-bg);border-color:var(--ok)}
+.rules-card.dont{background:var(--risk-bg);border-color:var(--risk)}
+.rules-h{font-size:20px;font-weight:800;margin-bottom:14px;letter-spacing:-.4px}
+.rules-card.do .rules-h{color:var(--ok)}
+.rules-card.dont .rules-h{color:var(--risk)}
+.rules-list{list-style:none}
+.rules-list li{padding:7px 0 7px 26px;font-size:11.5px;color:var(--n8);line-height:1.55;position:relative}
+.rules-card.do li::before{content:'✓';position:absolute;left:0;top:7px;color:var(--ok);font-weight:800;font-size:13px}
+.rules-card.dont li::before{content:'✗';position:absolute;left:0;top:7px;color:var(--risk);font-weight:800;font-size:13px}
+
+.trig-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.trig-card{background:var(--white);border:1px solid var(--n2);border-radius:var(--radius);padding:14px 16px;border-left:3px solid;transition:all var(--t)}
+.trig-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.trig-card.high{border-left-color:var(--risk)}
+.trig-card.med{border-left-color:var(--warn)}
+.trig-card.low{border-left-color:var(--n4)}
+.trig-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.trig-name{font-size:12px;font-weight:700;color:var(--n9);letter-spacing:-.1px}
+.trig-level{font-size:8.5px;font-weight:700;padding:3px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:.7px}
+.trig-card.high .trig-level{background:var(--risk-bg);color:var(--risk)}
+.trig-card.med .trig-level{background:var(--warn-bg);color:var(--warn)}
+.trig-card.low .trig-level{background:var(--n1);color:var(--n6)}
+.trig-d{font-size:10.5px;color:var(--n6);line-height:1.55}
+.trig-mit{font-size:10.5px;color:var(--frak-navy);font-weight:600;margin-top:8px;padding-top:8px;border-top:1px dashed var(--n2)}
+
+.hc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:14px}
+.hc-card{background:var(--white);border:1px solid var(--n2);border-radius:var(--radius);padding:14px 16px;transition:all var(--t)}
+.hc-card:hover{box-shadow:var(--shadow-md)}
+.hc-day{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:var(--frak-navy);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.hc-name{font-size:12px;font-weight:700;color:var(--n9);margin-bottom:6px;letter-spacing:-.1px}
+.hc-d{font-size:10.5px;color:var(--n6);line-height:1.55}
+
+/* ============ KPIs ============ */
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.kpi{background:var(--white);border:1px solid var(--n2);border-radius:var(--radius);padding:18px 20px;transition:all var(--t);position:relative;overflow:hidden}
+.kpi:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.kpi-l{font-size:9.5px;font-weight:700;color:var(--n5);text-transform:uppercase;letter-spacing:1.3px;margin-bottom:10px}
+.kpi-v{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:800;color:var(--frak-navy);letter-spacing:-.6px;line-height:1.1}
+.kpi-target{font-size:10.5px;color:var(--n5);margin-top:5px}
+.kpi-target strong{color:var(--n8)}
+.kpi-spark{height:32px;margin-top:12px}
+
+.mini-bars{display:flex;align-items:flex-end;gap:3px;height:60px;padding:8px 0}
+.mini-bar{flex:1;background:var(--n2);border-radius:2px 2px 0 0;min-height:4px;position:relative;transition:height 600ms cubic-bezier(.4,0,.2,1)}
+.mini-bar.proj{background:repeating-linear-gradient(45deg,var(--n3),var(--n3) 3px,var(--n2) 3px,var(--n2) 6px)}
+.mini-bar.act{background:var(--frak-navy)}
+.mini-bar.cur{background:var(--accent)}
+.mini-labels{display:flex;font-size:8.5px;color:var(--n5);font-family:'JetBrains Mono',monospace;margin-top:5px}
+.mini-labels div{flex:1;text-align:center}
+
+.funnel-row{display:grid;grid-template-columns:180px 1fr 90px;gap:16px;align-items:center;padding:11px 0;border-bottom:1px solid var(--n1)}
+.funnel-row:last-child{border-bottom:none}
+.funnel-l{font-size:12px;color:var(--n7);font-weight:600}
+.funnel-l .sub{display:block;font-size:10px;color:var(--n5);font-weight:400;margin-top:2px}
+.funnel-bar-track{height:26px;background:var(--n1);border-radius:5px;overflow:hidden;display:flex;align-items:center}
+.funnel-bar-fill{height:100%;background:linear-gradient(90deg,var(--frak-navy) 0%,#1f3a52 100%);border-radius:5px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;color:#fff;font-size:10.5px;font-weight:700;font-family:'JetBrains Mono',monospace;min-width:52px;transition:width 800ms cubic-bezier(.4,0,.2,1)}
+.funnel-val{text-align:right;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--frak-navy)}
+
+/* ============ FOOTER ============ */
+.foot{padding:24px 44px;background:var(--frak-dark);color:rgba(255,255,255,.55);font-size:11px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,.05)}
+.foot-l{display:flex;gap:20px;align-items:center}
+.foot-tag{color:var(--accent);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;font-size:10px}
+
+/* ============ NOTES ============ */
+.note{background:var(--n0);border:1px dashed var(--n3);border-radius:var(--radius-sm);padding:12px 15px;margin-top:14px;font-size:11px;color:var(--n6);line-height:1.55}
+.note strong{color:var(--n8)}
+
+.sec-strip{margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--n2)}
+
+/* ============ STATUS BANNER ============ */
+.banner{background:linear-gradient(90deg,rgba(201,168,76,.15) 0%,rgba(201,168,76,.04) 100%);border:1px solid rgba(201,168,76,.3);border-left:4px solid var(--accent);border-radius:var(--radius-sm);padding:14px 18px;margin-bottom:22px;display:flex;align-items:center;gap:16px;transition:all var(--t)}
+.banner.live{background:linear-gradient(90deg,rgba(31,138,92,.12) 0%,rgba(31,138,92,.02) 100%);border-color:rgba(31,138,92,.3);border-left-color:var(--ok)}
+.banner-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(201,168,76,.25);animation:pulse 2s infinite;flex-shrink:0}
+.banner.live .banner-dot{background:var(--ok);box-shadow:0 0 0 4px rgba(31,138,92,.25)}
+.banner-t{font-size:11.5px;font-weight:700;color:var(--frak-dark)}
+.banner-d{font-size:10.5px;color:var(--n6);margin-top:1px}
+
+/* ============ EDITOR PANEL ============ */
+.overlay{position:fixed;inset:0;background:rgba(18,28,39,.55);backdrop-filter:blur(4px);z-index:200;opacity:0;pointer-events:none;transition:opacity var(--t-slow)}
+.overlay.open{opacity:1;pointer-events:all}
+
+.editor{position:fixed;top:0;right:0;width:480px;height:100vh;background:var(--white);box-shadow:var(--shadow-xl);z-index:201;transform:translateX(100%);transition:transform var(--t-slow);display:flex;flex-direction:column}
+.editor.open{transform:translateX(0)}
+.editor-hd{padding:22px 28px;background:var(--frak-dark);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.editor-title{font-size:16px;font-weight:700;letter-spacing:-.2px}
+.editor-sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:3px}
+.editor-close{background:rgba(255,255,255,.06);border:none;color:#fff;width:32px;height:32px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background var(--t)}
+.editor-close:hover{background:rgba(255,255,255,.14)}
+.editor-close svg{width:16px;height:16px}
+.editor-body{flex:1;overflow-y:auto;padding:24px 28px}
+.editor-foot{padding:18px 28px;background:var(--n0);border-top:1px solid var(--n2);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-shrink:0}
+
+.field{margin-bottom:18px}
+.field-l{display:block;font-size:10.5px;font-weight:700;color:var(--n7);text-transform:uppercase;letter-spacing:1.1px;margin-bottom:7px}
+.field-l-sub{display:block;font-size:10.5px;font-weight:400;color:var(--n5);text-transform:none;letter-spacing:0;margin-top:2px}
+.field input,.field textarea,.field select{width:100%;padding:11px 14px;border:1px solid var(--n2);border-radius:8px;font-size:13px;font-family:inherit;color:var(--n8);background:var(--white);transition:all var(--t)}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--frak-navy);box-shadow:0 0 0 3px rgba(16,43,63,.10)}
+.field input.mono{font-family:'JetBrains Mono',monospace}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field-help{font-size:10.5px;color:var(--n5);margin-top:5px;line-height:1.5}
+.field-section{margin-top:24px;padding-top:18px;border-top:1px solid var(--n2)}
+.field-section:first-child{margin-top:0;padding-top:0;border-top:none}
+.field-section-h{font-size:11px;font-weight:700;color:var(--frak-navy);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px}
+
+.btn{padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all var(--t);display:inline-flex;align-items:center;gap:7px}
+.btn.primary{background:var(--frak-navy);color:#fff}
+.btn.primary:hover{background:var(--frak-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(16,43,63,.25)}
+.btn.ghost{background:var(--n1);color:var(--n7)}
+.btn.ghost:hover{background:var(--n2)}
+.btn.danger{background:transparent;color:var(--risk);border:1px solid var(--risk-soft)}
+.btn.danger:hover{background:var(--risk-bg)}
+
+/* ============ TOAST ============ */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--frak-dark);color:#fff;padding:12px 20px;border-radius:9px;font-size:12px;font-weight:600;box-shadow:var(--shadow-lg);z-index:300;transform:translateY(60px);opacity:0;transition:all var(--t-slow);display:flex;align-items:center;gap:10px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+
+/* ============ NUMBER ANIMATION ============ */
+.num-animate{display:inline-block;transition:all var(--t)}
+
+/* ============ MOBILE ============ */
+@media (max-width:1200px){
+  .g2,.g3,.g4,.g23,.g32,.kpi-strip,.hc-grid,.trig-grid,.rules-grid,.mc-strip,.week-cols{grid-template-columns:1fr}
+  .pillar-grid{grid-template-columns:repeat(2,1fr)}
+  .ex-why{grid-template-columns:repeat(2,1fr)}
+  .phase-cols{grid-template-columns:1fr}
+  .hm-row{grid-template-columns:repeat(3,1fr)}
+  .editor{width:100%}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============ TOP BAR ============ -->
+  <div class="topbar">
+    <div class="tb-brand">
+      <div class="tb-logo">F</div>
+      <div class="tb-name">Frak Finance<span>Reddit Operational Dashboard</span></div>
+    </div>
+    <div class="tb-actions">
+      <div class="tb-status" id="syncStatus">
+        <div class="tb-status-dot"></div>
+        <span id="lastUpdated">Last updated: never</span>
+      </div>
+      <button class="tb-btn ghost" onclick="exportData()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+      <button class="tb-btn primary" onclick="openEditor()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Update Weekly Stats
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ HERO ============ -->
+  <div class="hero">
+    <div class="hero-c">
+      <div class="hero-ey" id="heroEy">FRAK FINANCE · REDDIT OPERATIONAL DASHBOARD · v1.0</div>
+      <h1>Reddit Engagement <span>· Built for SEO, AI Visibility, and Long-Term Lead Generation</span></h1>
+      <div class="hero-s">A live operating system for Tom's Reddit presence across the 8-week warm-up and the 6+ months of branded engagement that follow. Update weekly stats with the button above and watch the dashboard reflect reality.</div>
+      <div class="hm-row" id="heroStrip"></div>
+    </div>
+  </div>
+
+  <!-- ============ TABS ============ -->
+  <div class="tb">
+    <div class="tb-b act" onclick="t(this,'t1')"><span class="tb-n">01</span>Mission Control</div>
+    <div class="tb-b" onclick="t(this,'t2')"><span class="tb-n">02</span>The 8-Week Warm-Up</div>
+    <div class="tb-b" onclick="t(this,'t3')"><span class="tb-n">03</span>Subreddit Map</div>
+    <div class="tb-b" onclick="t(this,'t4')"><span class="tb-n">04</span>Content Engine</div>
+    <div class="tb-b" onclick="t(this,'t5')"><span class="tb-n">05</span>Rules &amp; Risks</div>
+    <div class="tb-b" onclick="t(this,'t6')"><span class="tb-n">06</span>Pipeline &amp; Signals</div>
+  </div>
+
+  <!-- ============ TAB 1 · MISSION CONTROL ============ -->
+  <div class="tc act" id="t1">
+
+    <div class="sec">
+      <div class="banner" id="statusBanner">
+        <div class="banner-dot"></div>
+        <div>
+          <div class="banner-t" id="bannerT">Pre-launch state — awaiting kickoff</div>
+          <div class="banner-d" id="bannerD">All numbers below are targets/projections. Once execution begins, this dashboard reflects actuals.</div>
+        </div>
+      </div>
+
+      <div class="sd"><div class="sn">01</div><div><div class="st">Where we are right now</div><div class="ss">Eight-week warm-up window. Each phase has explicit entry and exit criteria. Karma is the gating metric.</div></div></div>
+
+      <div class="mc-hero">
+        <div class="mc-eyebrow">CURRENT PHASE</div>
+        <div class="mc-title" id="currentPhaseTitle">Phase 1 · Lurker Mode</div>
+        <div class="mc-sub" id="currentPhaseDesc">No posts. No comments. Browse 10–15 minutes daily, upvote 5–10 posts, read subreddit rules, look human. Two-week window. The point is for the account to exist quietly and build a trust signal before any activity.</div>
+        <div class="mc-strip" id="mcStats"></div>
+      </div>
+
+      <div class="sec-strip"></div>
+
+      <div class="sd"><div class="sn">02</div><div><div class="st">Phase rail — the 8-week arc at a glance</div><div class="ss">Phase progression updates automatically as karma and days lurked thresholds are met.</div></div></div>
+
+      <div class="phase-rail" id="phaseRail"></div>
+    </div>
+
+    <div class="sec alt">
+      <div class="sd"><div class="sn">03</div><div><div class="st">This week's focus</div><div class="ss">What to do in the next seven days. The run-sheet shifts as the phase advances.</div></div></div>
+
+      <div class="week-panel">
+        <div class="week-head">
+          <div class="week-title" id="weekTitle">Week 1 · <span>Establish the account and start lurking</span></div>
+          <div class="week-meta" id="weekMeta">PHASE 1 · DAY 1–7 OF 14</div>
+        </div>
+        <div class="week-cols" id="weekCols"></div>
+      </div>
+
+      <div class="g23">
+        <div class="cd">
+          <div class="ch nv"><div class="ct">PROGRESS TOWARD PHASE GATE</div><div class="cn" id="phaseProgressTitle">Phase 1 of 5</div></div>
+          <div class="cb" id="phaseProgress"></div>
+        </div>
+
+        <div class="cd">
+          <div class="ch dk"><div class="ct">ACCOUNT HEALTH SIGNALS</div><div class="cn">Monitor weekly</div></div>
+          <div class="cb">
+            <div class="sig"><div class="sig-dot info"></div><div class="sig-body"><div class="sig-t">Logged-out visibility check</div><div class="sig-d">Open Reddit profile in incognito every Monday. If posts/profile don't appear, that's a shadowban warning.</div></div></div>
+            <div class="sig"><div class="sig-dot info"></div><div class="sig-body"><div class="sig-t">r/ShadowBan bot</div><div class="sig-d">Post the username in r/ShadowBan once monthly. Auto-reply confirms ban status and lists removed posts.</div></div></div>
+            <div class="sig"><div class="sig-dot info"></div><div class="sig-body"><div class="sig-t">Engagement velocity</div><div class="sig-d">Track upvotes on first 3 comments each week. Sudden drop to zero = leading indicator something is wrong.</div></div></div>
+            <div class="sig"><div class="sig-dot info"></div><div class="sig-body"><div class="sig-t">Modmail status</div><div class="sig-d">If a post is removed, reply politely and move on. Repeated mod disputes are themselves a shadowban trigger.</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sd"><div class="sn">04</div><div><div class="st">Open decisions blocking kickoff</div><div class="ss">Six items need confirmation before Day 1. The first three are gating.</div></div></div>
+
+      <div class="g3">
+        <div class="cd"><div class="ch wn"><div class="ct">GATING · 1</div><div class="cn">Account history</div></div><div class="cb"><div style="font-size:12px;color:var(--n7);line-height:1.6">Does Tom have an existing Reddit account with usable history? If yes, share username so we can audit before any activity. If no, we start fresh and run full 8 weeks.</div><div class="note"><strong>Owner:</strong> Tom / Tina</div></div></div>
+        <div class="cd"><div class="ch wn"><div class="ct">GATING · 2</div><div class="cn">Operator identity</div></div><div class="cb"><div style="font-size:12px;color:var(--n7);line-height:1.6">Tom personally writing every comment, or are we drafting in his voice and he posts? Affects voice calibration and the review loop.</div><div class="note"><strong>Owner:</strong> Tom</div></div></div>
+        <div class="cd"><div class="ch wn"><div class="ct">GATING · 3</div><div class="cn">Weekly time</div></div><div class="cb"><div style="font-size:12px;color:var(--n7);line-height:1.6">2–3 hours is the floor. 5 is the right number for first 6 months. What can Tom realistically commit?</div><div class="note"><strong>Owner:</strong> Tom</div></div></div>
+        <div class="cd"><div class="ch"><div class="ct">CONFIRM · 4</div><div class="cn">Device &amp; IP</div></div><div class="cb"><div style="font-size:12px;color:var(--n7);line-height:1.6">Home, office, or both? Reddit tracks device fingerprints. Inconsistency early is a trust hit.</div><div class="note"><strong>Owner:</strong> Tom</div></div></div>
+        <div class="cd"><div class="ch"><div class="ct">CONFIRM · 5</div><div class="cn">Crisis playbook</div></div><div class="cb"><div style="font-size:12px;color:var(--n7);line-height:1.6">If a critic or troll goes after Frak publicly, who decides response — Tom in real time, or us advising?</div><div class="note"><strong>Owner:</strong> Tom + Copywriter</div></div></div>
+        <div class="cd"><div class="ch"><div class="ct">CONFIRM · 6</div><div class="cn">Success at Month 6</div></div><div class="cb"><div style="font-size:12px;color:var(--n7);line-height:1.6">Inbound calls? AI citation pickups? Both? Defines what we measure on Tab 6.</div><div class="note"><strong>Owner:</strong> Tom</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 2 · WARM-UP ============ -->
+  <div class="tc" id="t2">
+
+    <div class="sec">
+      <div class="sd"><div class="sn">01</div><div><div class="st">The 8-week arc, visualized</div><div class="ss">Each phase has explicit entry and exit criteria. Karma is the gating metric. Skipping ahead is the single biggest cause of failure on this channel.</div></div></div>
+
+      <div class="timeline">
+        <div class="tl-track"></div>
+        <div class="tl-fill" id="tlFill"></div>
+        <div class="tl-rail" id="tlRail"></div>
+      </div>
+
+      <div class="explain"><div class="explain-t">Why 8 weeks not 2</div><div class="explain-b">Standard B2B warm-up is 2–4 weeks. Finance subs are aggressively moderated and Tom's account carries his real name — so the cost of a shadowban here is asymmetric. The extra weeks buy a buffer most accounts don't get.</div></div>
+    </div>
+
+    <div class="sec alt" id="phaseCardsContainer"></div>
+  </div>
+
+  <!-- ============ TAB 3 · SUBREDDIT MAP ============ -->
+  <div class="tc" id="t3">
+
+    <div class="sec">
+      <div class="sd"><div class="sn">01</div><div><div class="st">Subreddit priority matrix</div><div class="ss">Three tiers. Tier 1 is where Frak's actual buyers post. Tier 2 is industry-specific. Tier 3 is the warm-up arena — no finance content allowed.</div></div></div>
+
+      <div class="matrix">
+        <div class="mx-hd"><div class="mx-title">Tier 1 · Primary Hunting Grounds</div><div class="mx-meta">5 SUBREDDITS · ~7.7M COMBINED MEMBERS</div></div>
+        <table class="mx-table">
+          <thead><tr><th>Subreddit</th><th>Size</th><th>ICP Fit</th><th>Mod Difficulty</th><th>Engagement</th><th>Priority</th><th>Frak's Angle</th></tr></thead>
+          <tbody>
+            <tr><td><span class="sub-name">r/smallbusiness</span></td><td><span class="sz">~2.2M</span></td><td><span class="heat heat-5">95</span></td><td><span class="heat heat-3">HIGH</span></td><td><span class="heat heat-5">DAILY</span></td><td><span class="pri-bar"><span class="pri-pip on hi"></span><span class="pri-pip on hi"></span><span class="pri-pip on hi"></span><span class="pri-pip on hi"></span><span class="pri-pip on hi"></span></span></td><td>Cash flow, margins, bookkeeping cleanup — the operational SMB questions</td></tr>
+            <tr><td><span class="sub-name">r/Entrepreneur</span></td><td><span class="sz">~4.9M</span></td><td><span class="heat heat-4">82</span></td><td><span class="heat heat-2">EXTREME</span></td><td><span class="heat heat-5">DAILY</span></td><td><span class="pri-bar"><span class="pri-pip on hi"></span><span class="pri-pip on hi"></span><span class="pri-pip on hi"></span><span class="pri-pip on hi"></span><span class="pri-pip"></span></span></td><td>Valuation, fractional CFO questions, pre-exit prep on founder threads</td></tr>
+            <tr><td><span class="sub-name">r/CFO</span></td><td><span class="sz">~10K</span></td><td><span class="heat heat-5">98</span></td><td><span class="heat heat-4">LOW</span></td><td><span class="heat heat-2">WEEKLY</span></td><td><span class="pri-bar"><span class="pri-pip on hi"></span><span class="pri-pip on hi"></span><span class="pri-pip on hi"></span><span class="pri-pip on hi"></span><span class="pri-pip on hi"></span></span></td><td>One thoughtful answer reaches 100% of addressable audience</td></tr>
+            <tr><td><span class="sub-name">r/sweatystartup</span></td><td><span class="sz">~250K</span></td><td><span class="heat heat-5">90</span></td><td><span class="heat heat-4">LOW</span></td><td><span class="heat heat-4">HIGH</span></td><td><span class="pri-bar"><span class="pri-pip on hi"></span><span class="pri-pip on hi"></span><span class="pri-pip on hi"></span><span class="pri-pip on hi"></span><span class="pri-pip"></span></span></td><td>Trades/home services operator-to-operator conversations</td></tr>
+            <tr><td><span class="sub-name">r/SaaS</span></td><td><span class="sz">~300K</span></td><td><span class="heat heat-4">85</span></td><td><span class="heat heat-3">HIGH</span></td><td><span class="heat heat-4">HIGH</span></td><td><span class="pri-bar"><span class="pri-pip on hi"></span><span class="pri-pip on hi"></span><span class="pri-pip on hi"></span><span class="pri-pip on"></span><span class="pri-pip"></span></span></td><td>Pre-raise finance modeling, burn rate, CAC payback</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="explain"><div class="explain-t">How to read this matrix</div><div class="explain-b"><strong>ICP Fit (1–100)</strong> = how closely the average poster matches Frak's ideal client. <strong>Mod Difficulty</strong> = how strict the rules and how aggressive the removals. <strong>Engagement</strong> = how often new threads relevant to Frak appear. <strong>Priority</strong> = where to spend the most time first. r/CFO is the sleeper — tiny audience but every member is exactly the buyer.</div></div>
+
+      <div class="matrix" style="margin-top:18px">
+        <div class="mx-hd"><div class="mx-title">Tier 2 · Industry &amp; Niche Subreddits</div><div class="mx-meta">5 SUBREDDITS · STEADY HIGH-QUALITY VOLUME</div></div>
+        <table class="mx-table">
+          <thead><tr><th>Subreddit</th><th>Size</th><th>ICP Fit</th><th>Mod Difficulty</th><th>Engagement</th><th>Priority</th><th>Frak's Angle</th></tr></thead>
+          <tbody>
+            <tr><td><span class="sub-name">r/Accounting</span></td><td><span class="sz">~700K</span></td><td><span class="heat heat-3">68</span></td><td><span class="heat heat-3">MED</span></td><td><span class="heat heat-3">MED</span></td><td><span class="pri-bar"><span class="pri-pip on"></span><span class="pri-pip on"></span><span class="pri-pip on"></span><span class="pri-pip"></span><span class="pri-pip"></span></span></td><td>Bookkeeping &amp; CoA questions; audience knows good from bad fast</td></tr>
+            <tr><td><span class="sub-name">r/Bookkeeping</span></td><td><span class="sz">~50K</span></td><td><span class="heat heat-4">88</span></td><td><span class="heat heat-4">LOW</span></td><td><span class="heat heat-3">MED</span></td><td><span class="pri-bar"><span class="pri-pip on"></span><span class="pri-pip on"></span><span class="pri-pip on"></span><span class="pri-pip on"></span><span class="pri-pip"></span></span></td><td>QBO cleanup, AP/AR — Frak's bookkeeping service maps 1:1</td></tr>
+            <tr><td><span class="sub-name">r/Ecommerce</span></td><td><span class="sz">~400K</span></td><td><span class="heat heat-4">80</span></td><td><span class="heat heat-3">MED</span></td><td><span class="heat heat-4">HIGH</span></td><td><span class="pri-bar"><span class="pri-pip on"></span><span class="pri-pip on"></span><span class="pri-pip on"></span><span class="pri-pip on"></span><span class="pri-pip"></span></span></td><td>Contribution margin, ROAS, inventory finance</td></tr>
+            <tr><td><span class="sub-name">r/HVAC, r/Plumbing</span></td><td><span class="sz">Mixed</span></td><td><span class="heat heat-3">72</span></td><td><span class="heat heat-4">LOW</span></td><td><span class="heat heat-3">MED</span></td><td><span class="pri-bar"><span class="pri-pip on"></span><span class="pri-pip on"></span><span class="pri-pip on"></span><span class="pri-pip"></span><span class="pri-pip"></span></span></td><td>Operator-to-operator margin and job costing conversations</td></tr>
+            <tr><td><span class="sub-name">r/PersonalFinance</span></td><td><span class="sz">~20M</span></td><td><span class="heat heat-2">35</span></td><td><span class="heat heat-3">MED</span></td><td><span class="heat heat-5">DAILY</span></td><td><span class="pri-bar"><span class="pri-pip on"></span><span class="pri-pip on"></span><span class="pri-pip"></span><span class="pri-pip"></span><span class="pri-pip"></span></span></td><td>Light financial literacy answers; warm-up commenting territory</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="matrix" style="margin-top:18px">
+        <div class="mx-hd"><div class="mx-title">Tier 3 · Warm-Up &amp; Casual Subreddits</div><div class="mx-meta">4 SUBREDDITS · NO FINANCE CONTENT</div></div>
+        <table class="mx-table">
+          <thead><tr><th>Subreddit</th><th>Size</th><th>Use Case</th><th>Allowed Content</th></tr></thead>
+          <tbody>
+            <tr><td><span class="sub-name">r/Chicago</span></td><td><span class="sz">~400K</span></td><td>Local relevance, natural fit</td><td>City news, restaurants, neighborhoods</td></tr>
+            <tr><td><span class="sub-name">r/AskReddit</span></td><td><span class="sz">~50M</span></td><td>Highest karma generation rate</td><td>Broad-interest threads, quick takes</td></tr>
+            <tr><td><span class="sub-name">r/investing</span></td><td><span class="sz">~3.5M</span></td><td>Adjacent to finance, not ICP</td><td>Market questions, fund discussion</td></tr>
+            <tr><td><span class="sub-name">Hobby subs</span></td><td><span class="sz">Varies</span></td><td>Look like a real person</td><td>Books, coffee, food — match interests</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sec alt">
+      <div class="sd"><div class="sn">02</div><div><div class="st">Where to spend time, by phase</div><div class="ss">The subreddit allocation shifts as the account matures. Read this column-by-column.</div></div></div>
+
+      <div class="matrix">
+        <div class="mx-hd"><div class="mx-title">Time Allocation by Phase</div><div class="mx-meta">% OF WEEKLY REDDIT TIME</div></div>
+        <table class="mx-table">
+          <thead><tr><th>Subreddit Tier</th><th>P1 · Wk 1–2</th><th>P2 · Wk 3–4</th><th>P3 · Wk 5–6</th><th>P4 · Wk 7–8</th><th>P5 · Wk 9+</th></tr></thead>
+          <tbody>
+            <tr><td><span class="sub-name">Tier 1 · Finance</span></td><td><span class="heat heat-1">0%</span></td><td><span class="heat heat-1">0%</span></td><td><span class="heat heat-1">20% lurk</span></td><td><span class="heat heat-3">40%</span></td><td><span class="heat heat-5">65%</span></td></tr>
+            <tr><td><span class="sub-name">Tier 2 · Industry</span></td><td><span class="heat heat-1">0%</span></td><td><span class="heat heat-1">0%</span></td><td><span class="heat heat-1">10%</span></td><td><span class="heat heat-3">25%</span></td><td><span class="heat heat-3">25%</span></td></tr>
+            <tr><td><span class="sub-name">Tier 3 · Casual</span></td><td><span class="heat heat-5">100%</span></td><td><span class="heat heat-5">100%</span></td><td><span class="heat heat-4">70%</span></td><td><span class="heat heat-3">35%</span></td><td><span class="heat heat-2">10%</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="explain ok"><div class="explain-t">The mix matters</div><div class="explain-b">An account that suddenly switches from 100% casual to 100% finance in Week 7 looks suspicious. Even in Phase 5 steady-state, keep <strong>~10% activity in casual subs</strong> so the profile reads as a real person with a life outside of finance.</div></div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 4 · CONTENT ENGINE ============ -->
+  <div class="tc" id="t4">
+    <div class="sec">
+      <div class="sd"><div class="sn">01</div><div><div class="st">The five content pillars</div><div class="ss">Every comment Tom makes should sit inside one of these five buckets. These are the topics where Frak has genuine, hard-earned expertise.</div></div></div>
+
+      <div class="pillar-grid">
+        <div class="pillar"><div class="pillar-n">PILLAR · 01</div><div class="pillar-t">Cash flow &amp; runway</div><div class="pillar-d">13-week models, runway forecasting, working capital, seasonality.</div><div class="pillar-sub"><div class="pillar-sub-l">BEST SUBS</div><div class="pillar-sub-v"><strong>r/smallbusiness</strong> · r/SaaS</div></div></div>
+        <div class="pillar"><div class="pillar-n">PILLAR · 02</div><div class="pillar-t">Bookkeeping &amp; cleanup</div><div class="pillar-d">CoA structure, QuickBooks fixes, monthly close, AP/AR workflow.</div><div class="pillar-sub"><div class="pillar-sub-l">BEST SUBS</div><div class="pillar-sub-v"><strong>r/Bookkeeping</strong> · r/Accounting</div></div></div>
+        <div class="pillar"><div class="pillar-n">PILLAR · 03</div><div class="pillar-t">Exit planning &amp; selling</div><div class="pillar-d">What buyers look at, EBITDA normalization, concentration, 18–36 mo runway.</div><div class="pillar-sub"><div class="pillar-sub-l">BEST SUBS</div><div class="pillar-sub-v"><strong>r/smallbusiness</strong> · r/sweatystartup</div></div></div>
+        <div class="pillar"><div class="pillar-n">PILLAR · 04</div><div class="pillar-t">When to hire a fractional CFO</div><div class="pillar-d">What the role does, how it differs from a CPA, when it pays for itself.</div><div class="pillar-sub"><div class="pillar-sub-l">BEST SUBS</div><div class="pillar-sub-v"><strong>r/Entrepreneur</strong> · r/CFO</div></div></div>
+        <div class="pillar"><div class="pillar-n">PILLAR · 05</div><div class="pillar-t">Operator-level decisions</div><div class="pillar-d">Pricing, margin, debt vs equity, reading your own P&amp;L like an investor.</div><div class="pillar-sub"><div class="pillar-sub-l">BEST SUBS</div><div class="pillar-sub-v"><strong>r/sweatystartup</strong> · r/Ecommerce</div></div></div>
+      </div>
+    </div>
+
+    <div class="sec alt">
+      <div class="sd"><div class="sn">02</div><div><div class="st">What a good comment actually looks like</div><div class="ss">A worked example. Same template applies to all five pillars.</div></div></div>
+
+      <div class="ex-block">
+        <div class="ex-h">EXAMPLE · Pillar 3 — Exit Planning · r/smallbusiness</div>
+        <div class="ex-prompt">"I am thinking about selling my business in a couple of years. Anything I should be doing now to prepare?"</div>
+        <div class="ex-body">
+          <p>Two years is a great window. Three things I'd do right now if I were you:</p>
+          <p><strong>First, clean up your books.</strong> Most owners don't realize how messy their financials look to a buyer. Normalize the owner expenses, separate personal from business, get gross margin reporting consistent. Buyers discount the multiple when financials are a mess.</p>
+          <p><strong>Second, look at customer concentration.</strong> If one customer is 30%+ of revenue, that's a red flag in every diligence process. Diversify now.</p>
+          <p><strong>Third, write down how the business runs.</strong> SOPs, who owns what, how decisions get made. Buyers pay more for businesses that don't depend on the owner.</p>
+          <p>Two years is enough to fix all three. One year is tight. Six months is a fire sale.</p>
+        </div>
+        <div class="ex-why">
+          <div class="ex-why-c"><div class="ex-why-l">SPECIFIC</div><div class="ex-why-v">Names 3 concrete actions, not vague advice</div></div>
+          <div class="ex-why-c"><div class="ex-why-l">OPERATOR</div><div class="ex-why-v">Reads like someone who's done diligence, not textbook</div></div>
+          <div class="ex-why-c"><div class="ex-why-l">CALIBRATED</div><div class="ex-why-v">Acknowledges complexity ("it depends on timing")</div></div>
+          <div class="ex-why-c"><div class="ex-why-l">NO FRAK</div><div class="ex-why-v">Useful on its own. Doesn't need the mention.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sd"><div class="sn">03</div><div><div class="st">Post formats that work (Month 3+)</div><div class="ss">Original posts are powerful but they come later. Each format below has been tested on Reddit and consistently outperforms generic content.</div></div></div>
+
+      <div class="cd">
+        <div class="ch nv"><div class="ct">POST TYPES</div><div class="cn">4 proven formats for Month 3+</div></div>
+        <div class="cb">
+          <div class="fmt-row"><div class="fmt-tag">LESSONS POST</div><div class="fmt-d"><strong>"I've done diligence on 40+ acquisitions. Here are the 5 things sellers always underestimate."</strong><br>Tom's biographical asset translates into authority. List format, specific numbers, no fluff. Lands hardest in <strong>r/smallbusiness</strong> and <strong>r/Entrepreneur</strong>.</div></div>
+          <div class="fmt-row"><div class="fmt-tag alt2">FRAMEWORK</div><div class="fmt-d"><strong>"A simple way to decide if you need a fractional CFO yet."</strong><br>Decision trees and checklists get bookmarked and referenced. Highest comment-to-upvote ratio of any format. <strong>r/Entrepreneur, r/SaaS, r/sweatystartup</strong>.</div></div>
+          <div class="fmt-row"><div class="fmt-tag alt3">CASE STUDY</div><div class="fmt-d"><strong>"How a $4M DTC brand fixed its paid media economics — anonymized walkthrough."</strong><br>Real numbers (anonymized) outperform abstract advice 5:1. Best in <strong>r/Ecommerce, r/SaaS</strong>, where audiences want to see specifics.</div></div>
+          <div class="fmt-row"><div class="fmt-tag alt4">OBSERVATION</div><div class="fmt-d"><strong>"What I'm seeing in M&amp;A diligence in 2026 — three patterns owners should know."</strong><br>Industry-trends posts get reshared. Position Tom as a pattern-spotter, not just a service provider. Cross-pollinates between <strong>r/CFO</strong> and <strong>r/smallbusiness</strong>.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec alt">
+      <div class="sd"><div class="sn">04</div><div><div class="st">Tom's profile setup</div><div class="ss">The finalized version. Profile copy goes live on Day 1.</div></div></div>
+
+      <div class="g2">
+        <div class="cd"><div class="ch nv"><div class="ct">USERNAME &amp; DISPLAY</div><div class="cn">Identity</div></div><div class="cb">
+          <div class="ci"><div class="ci-l">Username format</div><div class="ci-r">tom-dillon or t_dillon_</div></div>
+          <div class="ci"><div class="ci-l">Display name</div><div class="ci-r">Tom Dillon</div></div>
+          <div class="ci"><div class="ci-l">Profile photo</div><div class="ci-r">Real headshot</div></div>
+          <div class="ci"><div class="ci-l">Banner</div><div class="ci-r">Optional · neutral</div></div>
+          <div class="note"><strong>Avoid:</strong> usernames with "cfo", "finance", or "frak" — instant brand-account flag.</div>
+        </div></div>
+        <div class="cd"><div class="ch gd"><div class="ct">BIO COPY · CURRENT PICK</div><div class="cn">Option 4 — operator framing</div></div><div class="cb">
+          <div style="background:var(--n0);border:1px solid var(--n2);border-radius:7px;padding:14px;font-size:12.5px;color:var(--n8);line-height:1.6;font-style:italic">"Worked in investment banking, then ran finance for a PE-backed company, now do fractional CFO work for small businesses. Based in Chicago."</div>
+          <div class="note" style="margin-top:10px"><strong>Why this one:</strong> Reads like a person introducing themselves, not a LinkedIn bio. Career arc is there without being a brag. No Frak mention. Conversational without being sloppy.</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 5 · RULES & RISKS ============ -->
+  <div class="tc" id="t5">
+
+    <div class="sec">
+      <div class="sd"><div class="sn">01</div><div><div class="st">The do's and don'ts</div><div class="ss">Print this. Keep it next to the screen. Check before every Reddit session.</div></div></div>
+
+      <div class="rules-grid">
+        <div class="rules-card do">
+          <div class="rules-h">DO</div>
+          <ul class="rules-list">
+            <li>Help people without expecting anything back</li>
+            <li>Read subreddit rules before every first post</li>
+            <li>Write in plain, conversational language — typos OK</li>
+            <li>Disclose connection to Frak every single mention</li>
+            <li>Reply when others respond — 2-way matters most</li>
+            <li>Stay in domains where Frak has real expertise</li>
+            <li>Acknowledge fair criticism — "fair point" wins</li>
+            <li>Use the same device and connection consistently</li>
+            <li>Track which comment types get upvoted, lean in</li>
+            <li>Take breaks. Quality beats quantity, always.</li>
+          </ul>
+        </div>
+        <div class="rules-card dont">
+          <div class="rules-h">DON'T</div>
+          <ul class="rules-list">
+            <li>Post anything promotional in the first 8 weeks</li>
+            <li>Use the same comment in different threads</li>
+            <li>Post the same Frak link across subreddits</li>
+            <li>Use link shorteners (bit.ly, tinyurl, etc.)</li>
+            <li>Ask anyone to upvote — that's vote manipulation</li>
+            <li>Use a VPN or rotating IPs on the account</li>
+            <li>Paste AI-generated text directly into comments</li>
+            <li>Get defensive when criticized — never</li>
+            <li>Delete and repost trying to game engagement</li>
+            <li>Write like a marketer ("excited to announce")</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec alt">
+      <div class="sd"><div class="sn">02</div><div><div class="st">Shadowban triggers — ranked by frequency</div><div class="ss">96.4% of Reddit content removals are algorithmic. Below are the ten behaviors that trigger them most often, with our mitigation for each.</div></div></div>
+
+      <div class="trig-grid">
+        <div class="trig-card high"><div class="trig-h"><div class="trig-name">01 · Rapid posting from new account</div><div class="trig-level">HIGH</div></div><div class="trig-d">New accounts that post within hours of creation are auto-flagged.</div><div class="trig-mit">→ 14 days of zero posting (Phase 1)</div></div>
+        <div class="trig-card high"><div class="trig-h"><div class="trig-name">02 · Same link in multiple subs</div><div class="trig-level">HIGH</div></div><div class="trig-d">Reddit's anti-spam engine treats cross-posted links as the #1 spam signal.</div><div class="trig-mit">→ Each Frak link posted in only one sub, ever</div></div>
+        <div class="trig-card high"><div class="trig-h"><div class="trig-name">03 · URL shorteners</div><div class="trig-level">HIGH</div></div><div class="trig-d">bit.ly, tinyurl, etc. are banned outright in most subs.</div><div class="trig-mit">→ Full URLs to frakfinance.com only</div></div>
+        <div class="trig-card high"><div class="trig-h"><div class="trig-name">04 · Vote manipulation</div><div class="trig-level">HIGH</div></div><div class="trig-d">Alt accounts, upvote brigading, asking for upvotes.</div><div class="trig-mit">→ One account, no team participation</div></div>
+        <div class="trig-card med"><div class="trig-h"><div class="trig-name">05 · Copy-pasted comments</div><div class="trig-level">MED</div></div><div class="trig-d">Identical text across threads triggers duplicate-content filters.</div><div class="trig-mit">→ Every comment written fresh, in context</div></div>
+        <div class="trig-card med"><div class="trig-h"><div class="trig-name">06 · Cross-posted same content</div><div class="trig-level">MED</div></div><div class="trig-d">Posting identical threads in multiple subs.</div><div class="trig-mit">→ 1 post / sub / week max; never duplicated</div></div>
+        <div class="trig-card med"><div class="trig-h"><div class="trig-name">07 · AI-style writing detected</div><div class="trig-level">MED</div></div><div class="trig-d">Reddit + OpenAI partnership flags overly polished text.</div><div class="trig-mit">→ Tom drafts in his voice; never paste AI output</div></div>
+        <div class="trig-card med"><div class="trig-h"><div class="trig-name">08 · VPN / datacenter IPs</div><div class="trig-level">MED</div></div><div class="trig-d">Non-residential IPs trigger spam scoring.</div><div class="trig-mit">→ Home/office IP only, never VPN</div></div>
+        <div class="trig-card low"><div class="trig-h"><div class="trig-name">09 · Account/IP cluster overlap</div><div class="trig-level">LOW</div></div><div class="trig-d">Multiple Reddit accounts on the same IP look coordinated.</div><div class="trig-mit">→ Only Tom's account on his device/IP</div></div>
+        <div class="trig-card low"><div class="trig-h"><div class="trig-name">10 · Aggressive early cross-posting</div><div class="trig-level">LOW</div></div><div class="trig-d">New accounts hitting high-traffic subs aggressively.</div><div class="trig-mit">→ First high-traffic post no earlier than Week 9</div></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sd"><div class="sn">03</div><div><div class="st">Crisis playbook — handling criticism</div><div class="ss">Someone will say Frak is overpriced. Someone will recommend a competitor. How the account responds defines the brand more than any campaign.</div></div></div>
+
+      <div class="g3">
+        <div class="cd"><div class="ch ok"><div class="ct">SCENARIO A</div><div class="cn">Fair criticism</div></div><div class="cb">
+          <div style="font-size:12px;color:var(--n7);line-height:1.6">Acknowledge it. <strong>"That's a fair point. We've heard that feedback before. Here's how we think about it..."</strong></div>
+          <div class="note" style="margin-top:10px">This response gets upvoted heavily. Turns critics into people who respect the brand even without buying.</div>
+        </div></div>
+        <div class="cd"><div class="ch wn"><div class="ct">SCENARIO B</div><div class="cn">Wrong criticism</div></div><div class="cb">
+          <div style="font-size:12px;color:var(--n7);line-height:1.6">Correct gently. <strong>"I think there may be some confusion. We actually handle that differently — here's what we do."</strong></div>
+          <div class="note" style="margin-top:10px">Never say "you're wrong." Never be condescending. The silent audience decides who looks better.</div>
+        </div></div>
+        <div class="cd"><div class="ch rk"><div class="ct">SCENARIO C</div><div class="cn">Trolling</div></div><div class="cb">
+          <div style="font-size:12px;color:var(--n7);line-height:1.6"><strong>Ignore.</strong> Do not respond. Do not downvote. Do not engage.</div>
+          <div class="note" style="margin-top:10px">Trolls feed on engagement. Other Reddit users recognize trolling instantly. Silence wins.</div>
+        </div></div>
+      </div>
+
+      <div class="explain risk"><div class="explain-t">The hardest rule on Reddit</div><div class="explain-b">Never argue with a critic publicly. Even when you are right. Even when the criticism is unfair. The thread is being read by hundreds of silent observers, and the calm person always looks better than the one firing back. <strong>If a response would be heated, walk away from the keyboard and come back the next day.</strong></div></div>
+    </div>
+
+    <div class="sec alt">
+      <div class="sd"><div class="sn">04</div><div><div class="st">Weekly health-check protocol</div><div class="ss">Five checks every Monday morning. Takes under 10 minutes.</div></div></div>
+
+      <div class="hc-grid">
+        <div class="hc-card"><div class="hc-day">MON · 9:00 AM</div><div class="hc-name">Incognito visibility check</div><div class="hc-d">Open Reddit profile in incognito. If profile or posts don't appear, that's the first sign of a shadowban.</div></div>
+        <div class="hc-card"><div class="hc-day">MON · WEEKLY</div><div class="hc-name">Engagement velocity scan</div><div class="hc-d">Last 3 comments — did any get upvotes or replies? Sudden zero is a leading indicator of soft suppression.</div></div>
+        <div class="hc-card"><div class="hc-day">MONTHLY</div><div class="hc-name">r/ShadowBan bot post</div><div class="hc-d">Post username in r/ShadowBan once a month. Bot auto-replies with status and lists silently-removed posts.</div></div>
+        <div class="hc-card"><div class="hc-day">AS NEEDED</div><div class="hc-name">Modmail review</div><div class="hc-d">If a comment is removed, reply once and politely. Multiple disputes themselves trigger penalties.</div></div>
+        <div class="hc-card"><div class="hc-day">WEEKLY</div><div class="hc-name">Karma growth tracking</div><div class="hc-d">Total karma should grow steadily from Week 3 onward. Drops or stalls deserve immediate attention.</div></div>
+        <div class="hc-card"><div class="hc-day">WEEKLY</div><div class="hc-name">Profile visit count</div><div class="hc-d">Reddit shows how many users viewed the profile. Growing number = visibility compounding.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 6 · PIPELINE & SIGNALS ============ -->
+  <div class="tc" id="t6">
+
+    <div class="sec">
+      <div class="sd"><div class="sn">01</div><div><div class="st">KPI dashboard</div><div class="ss">The numbers that tell us whether this channel is working. Update via the button above.</div></div></div>
+
+      <div class="kpi-strip" id="kpiStrip"></div>
+
+      <div class="explain"><div class="explain-t">Reading the projections</div><div class="explain-b">Solid bars = actuals. Hatched bars = projections. The shape that matters most is <strong>karma growth compounding from Week 3 onward</strong> and <strong>inbound DMs starting around Month 3</strong>. If those two leading indicators stay flat past M3, something is wrong with voice or subreddit selection.</div></div>
+    </div>
+
+    <div class="sec alt">
+      <div class="sd"><div class="sn">02</div><div><div class="st">The Reddit-to-discovery-call funnel</div><div class="ss">How a Reddit comment turns into a Frak client. Projection for Month 6 steady-state.</div></div></div>
+
+      <div class="cd">
+        <div class="ch dk"><div class="ct">MONTHLY FUNNEL · M6 STEADY-STATE PROJECTION</div><div class="cn">Top of funnel → discovery call</div></div>
+        <div class="cb">
+          <div class="funnel-row">
+            <div class="funnel-l">Comments posted<span class="sub">across all Tier 1 + Tier 2 subs</span></div>
+            <div class="funnel-bar-track"><div class="funnel-bar-fill" style="width:100%">100%</div></div>
+            <div class="funnel-val">~24 / mo</div>
+          </div>
+          <div class="funnel-row">
+            <div class="funnel-l">Comment impressions<span class="sub">total views across all comments</span></div>
+            <div class="funnel-bar-track"><div class="funnel-bar-fill" style="width:78%">~78%</div></div>
+            <div class="funnel-val">~18K / mo</div>
+          </div>
+          <div class="funnel-row">
+            <div class="funnel-l">Profile clicks<span class="sub">users who clicked Tom's profile after a comment</span></div>
+            <div class="funnel-bar-track"><div class="funnel-bar-fill" style="width:42%">42</div></div>
+            <div class="funnel-val">~150 / mo</div>
+          </div>
+          <div class="funnel-row">
+            <div class="funnel-l">Frakfinance.com visits<span class="sub">tracked via Reddit referral</span></div>
+            <div class="funnel-bar-track"><div class="funnel-bar-fill" style="width:18%">18</div></div>
+            <div class="funnel-val">~45 / mo</div>
+          </div>
+          <div class="funnel-row">
+            <div class="funnel-l">Inbound DMs<span class="sub">direct messages to Tom from Reddit users</span></div>
+            <div class="funnel-bar-track"><div class="funnel-bar-fill" style="width:8%">8</div></div>
+            <div class="funnel-val">~6 / mo</div>
+          </div>
+          <div class="funnel-row">
+            <div class="funnel-l">Discovery calls booked<span class="sub">via DM or via inbound from site visit</span></div>
+            <div class="funnel-bar-track"><div class="funnel-bar-fill" style="width:3%">3</div></div>
+            <div class="funnel-val">~2 / mo</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="explain warn"><div class="explain-t">Caveat on funnel projections</div><div class="explain-b">These conversion rates are <strong>industry-standard for B2B Reddit channels at Month 6</strong>, not Frak-specific. The actuals depend heavily on how well voice calibration goes in Phase 2–4, which subreddits perform best, and whether moderators allow self-disclosed mentions. Treat as a directional projection, not a forecast.</div></div>
+    </div>
+
+    <div class="sec">
+      <div class="sd"><div class="sn">03</div><div><div class="st">Timeline expectations — what to expect, by month</div><div class="ss">Reddit is the longest-payoff channel in Frak's mix. This table sets realistic expectations.</div></div></div>
+
+      <div class="matrix">
+        <div class="mx-hd"><div class="mx-title">Phased Expectations</div><div class="mx-meta">8-MONTH PROJECTION</div></div>
+        <table class="mx-table">
+          <thead><tr><th style="width:130px">Period</th><th>What to expect</th><th>Leading indicators</th><th>Focus</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Month 1–2</strong><br><span class="sz">Phase 1–2</span></td><td>Growing karma. A handful of upvoted comments. <strong>Zero leads.</strong></td><td>Karma climbing past 100 by Week 4</td><td>Pure value. Zero promotion. Learn each community.</td></tr>
+            <tr><td><strong>Month 3–4</strong><br><span class="sz">Phase 3–4</span></td><td>Recognized in finance subs. Replies to comments. <strong>First inbound DMs.</strong></td><td>1–3 DMs total by end of M4</td><td>First Frak mentions, only where directly relevant.</td></tr>
+            <tr><td><strong>Month 5–6</strong><br><span class="sz">Phase 5</span></td><td>Reddit referral traffic. <strong>First attributable inbound calls.</strong> Other Redditors mentioning Frak.</td><td>1–2 calls / mo · 4–6 DMs / mo</td><td>Maintain cadence. Consider an AMA in r/smallbusiness.</td></tr>
+            <tr><td><strong>Month 6+</strong><br><span class="sz">Steady-state</span></td><td>Steady inbound channel. <strong>Comments surfacing in ChatGPT/Perplexity answers.</strong></td><td>2–3 calls / mo · AI citation visibility</td><td>Protect what's built. Consider second team member account.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sec alt">
+      <div class="sd"><div class="sn">04</div><div><div class="st">AI visibility tracking</div><div class="ss">The strategic payoff of this channel. Quarterly checks on whether Tom's comments are surfacing in ChatGPT, Perplexity, and Google AI Overviews.</div></div></div>
+
+      <div class="cd">
+        <div class="ch gd"><div class="ct">QUARTERLY CHECK · TEST QUERIES</div><div class="cn">Run these in ChatGPT, Perplexity, Gemini, Google AI Overviews</div></div>
+        <div class="cb">
+          <div class="ci"><div class="ci-l">"Do I need a fractional CFO for my SaaS business?"</div><div class="ci-r tg tg-info">Q1 · M3</div></div>
+          <div class="ci"><div class="ci-l">"How do I prepare to sell my small business?"</div><div class="ci-r tg tg-info">Q1 · M3</div></div>
+          <div class="ci"><div class="ci-l">"How do I clean up QuickBooks before due diligence?"</div><div class="ci-r tg tg-info">Q2 · M6</div></div>
+          <div class="ci"><div class="ci-l">"What does a fractional CFO actually do?"</div><div class="ci-r tg tg-info">Q2 · M6</div></div>
+          <div class="ci"><div class="ci-l">"How do you value an SMB before selling?"</div><div class="ci-r tg tg-info">Q3 · M9</div></div>
+          <div class="ci"><div class="ci-l">"How do I model a 13-week cash flow forecast?"</div><div class="ci-r tg tg-info">Q3 · M9</div></div>
+        </div>
+      </div>
+
+      <div class="explain ok"><div class="explain-t">Why this matters</div><div class="explain-b">Reddit threads now account for ~40% of citations across major LLM-powered search engines. The strategic payoff of this channel isn't the immediate leads — it's that <strong>Tom's comments become quotable sources for AI tools answering high-intent finance questions</strong>. Once that happens, the channel keeps paying off years after individual comments were posted.</div></div>
+    </div>
+  </div>
+
+  <!-- ============ FOOTER ============ -->
+  <div class="foot">
+    <div class="foot-l">
+      <span class="foot-tag">FRAK FINANCE</span>
+      <span>Reddit Operational Dashboard · v2.0 · Live · Data persists in your browser</span>
+    </div>
+    <div>
+      <span>frakfinance.com</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ EDITOR PANEL ============ -->
+<div class="overlay" id="overlay" onclick="closeEditor()"></div>
+<aside class="editor" id="editor">
+  <div class="editor-hd">
+    <div>
+      <div class="editor-title">Update Weekly Stats</div>
+      <div class="editor-sub">Enter the numbers from this past week of Reddit activity</div>
+    </div>
+    <button class="editor-close" onclick="closeEditor()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="editor-body">
+    <div class="field-section">
+      <div class="field-section-h">Campaign Timing</div>
+      <div class="field">
+        <label class="field-l">Status<span class="field-l-sub">When the account actually goes live, switch this to "Live"</span></label>
+        <select id="f_status">
+          <option value="prelaunch">Pre-launch — not started yet</option>
+          <option value="live">Live — account is active</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-l">Days into campaign<span class="field-l-sub">Day 1 = first day Tom logged into the account</span></label>
+        <input type="number" id="f_day" class="mono" min="0" max="365" placeholder="0">
+      </div>
+    </div>
+
+    <div class="field-section">
+      <div class="field-section-h">Core Metrics</div>
+      <div class="field">
+        <label class="field-l">Karma total<span class="field-l-sub">Sum of post + comment karma on the profile</span></label>
+        <input type="number" id="f_karma" class="mono" min="0" placeholder="0">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-l">Subs joined</label>
+          <input type="number" id="f_subs" class="mono" min="0" max="50" placeholder="0">
+        </div>
+        <div class="field">
+          <label class="field-l">Days lurked</label>
+          <input type="number" id="f_lurked" class="mono" min="0" placeholder="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="field-section">
+      <div class="field-section-h">This Week's Activity</div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-l">Comments posted</label>
+          <input type="number" id="f_comments" class="mono" min="0" placeholder="0">
+        </div>
+        <div class="field">
+          <label class="field-l">Posts published</label>
+          <input type="number" id="f_posts" class="mono" min="0" placeholder="0">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-l">Inbound DMs</label>
+          <input type="number" id="f_dms" class="mono" min="0" placeholder="0">
+        </div>
+        <div class="field">
+          <label class="field-l">Profile visits</label>
+          <input type="number" id="f_visits" class="mono" min="0" placeholder="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="field-section">
+      <div class="field-section-h">Pipeline (cumulative)</div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-l">Reddit referral visits<span class="field-l-sub">to frakfinance.com</span></label>
+          <input type="number" id="f_referrals" class="mono" min="0" placeholder="0">
+        </div>
+        <div class="field">
+          <label class="field-l">Discovery calls booked</label>
+          <input type="number" id="f_calls" class="mono" min="0" placeholder="0">
+        </div>
+      </div>
+    </div>
+
+    <div class="field-section">
+      <div class="field-section-h">Account Health</div>
+      <div class="field">
+        <label class="field-l">Health status</label>
+        <select id="f_health">
+          <option value="">— (not yet live)</option>
+          <option value="ok">OK — engagement velocity normal</option>
+          <option value="watch">Watch — minor concerns</option>
+          <option value="risk">Risk — possible shadowban / mod issue</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-l">Notes this week<span class="field-l-sub">Anything to flag for the team — moderator removals, breakthrough comments, leads, etc.</span></label>
+        <textarea id="f_notes" rows="3" placeholder="Optional notes..."></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="editor-foot">
+    <button class="btn danger" onclick="resetData()">Reset all</button>
+    <div style="display:flex;gap:8px">
+      <button class="btn ghost" onclick="closeEditor()">Cancel</button>
+      <button class="btn primary" onclick="saveData()">Save changes</button>
+    </div>
+  </div>
+</aside>
+
+<!-- ============ TOAST ============ -->
+<div class="toast" id="toast"><div class="toast-dot"></div><span id="toastMsg">Saved</span></div>
+
+<script>
+/* ============ DATA MODEL ============ */
+const DEFAULTS = {
+  status: 'prelaunch',
+  day: 0,
+  karma: 0,
+  subs: 0,
+  lurked: 0,
+  comments: 0,
+  posts: 0,
+  dms: 0,
+  visits: 0,
+  referrals: 0,
+  calls: 0,
+  health: '',
+  notes: '',
+  lastUpdated: null,
+  history: []
+};
+
+const PHASE_GATES = [
+  { id:1, weeks:'1–2', name:'Lurker Mode', dayMin:0, dayMax:14, karmaMin:0, desc:'No posts. No comments. Browse 10–15 minutes daily, upvote 5–10 posts, read subreddit rules, look human. Two-week window. The point is for the account to exist quietly and build a trust signal before any activity.' },
+  { id:2, weeks:'3–4', name:'First Comments — Casual Subs Only', dayMin:14, dayMax:28, karmaMin:0, karmaTarget:100, desc:'2–4 comments per day in casual subs only. Conversational, real-person tone. No links, no mentions of finance or Frak. Reply when others respond.' },
+  { id:3, weeks:'5–6', name:'First Posts + Lurking Target Subs', dayMin:28, dayMax:42, karmaMin:100, karmaTarget:250, desc:'1–2 original posts/week in casual subs. 3–5 comments/day across 5+ subs. Start lurking in Tier 1 finance subs — read only.' },
+  { id:4, weeks:'7–8', name:'First Comments in Finance Subs', dayMin:42, dayMax:56, karmaMin:250, karmaTarget:400, desc:'2–3 substantive comments/week in Tier 1 subs. No Frak mention yet. If asked, say "I run a fractional CFO firm." Stop there.' },
+  { id:5, weeks:'9+', name:'Strategic Frak Mentions — 95/5 Ratio', dayMin:56, dayMax:9999, karmaMin:400, desc:'95% pure help, zero Frak mention. 5% only when contextually invited. Always lead with disclosure.' }
+];
+
+const WEEK_RUNSHEETS = {
+  1: {
+    title:'Week 1 · <span>Establish the account and start lurking</span>',
+    cols:[
+      ['Setup (Day 1)', ['Create account from home IP, consistent device','Add profile photo (real headshot, not logo)','Add bio (see Tab 4 for finalized version)','Verify email, confirm settings are clean']],
+      ['Daily routine (Day 2–7)', ['10–15 minutes of browsing per day','Upvote 5–10 posts or comments you genuinely like','Read sidebar rules on every subscribed sub','Read 20–30 top posts in r/smallbusiness, r/Entrepreneur to learn voice']],
+      ['What NOT to do', ['No posting. No commenting. None.','No DMs to anyone, even friendly ones','No editing the bio repeatedly','No logging in from different devices or IPs']]
+    ]
+  },
+  2: {
+    title:'Week 2 · <span>Continue lurking, prepare to comment</span>',
+    cols:[
+      ['This week', ['Keep daily browsing 15 min','Upvote 5–10 posts per session','Read top monthly posts in target subs','Note which comment styles get upvoted']],
+      ['Prep for Phase 2', ['Pick 3 casual subs to start commenting in','Read recent rules updates','Draft 2–3 trial comments locally — don\'t post yet','Confirm device & IP consistency']],
+      ['Still NOT doing', ['No posts. No comments. None yet.','No commenting in finance subs','No engaging in DMs','No bio changes']]
+    ]
+  },
+  3: {
+    title:'Week 3 · <span>First comments — casual subs only</span>',
+    cols:[
+      ['This week', ['Post 2–4 comments per day','Casual subs only — r/Chicago, r/AskReddit, hobby subs','Keep comments short (2–5 sentences)','Reply when others respond']],
+      ['Voice calibration', ['Conversational, real-person tone','Typos and slang are OK','No structured / polished writing','No bullet points']],
+      ['Hard NOs', ['No finance content anywhere','No links of any kind','No copy-pasted comments','No mention of CFO, Frak, anything related']]
+    ]
+  },
+  4: {
+    title:'Week 4 · <span>Build to 100+ karma</span>',
+    cols:[
+      ['This week', ['3–5 comments per day','Spread across at least 4 casual subs','Engage in back-and-forth replies','Track which comments get upvoted']],
+      ['Phase 2 gate', ['Target: 100+ total karma','Threshold bypasses most spam filters','If at 80+, push through week 5','If at 50−, slow down and review voice']],
+      ['Still NOT doing', ['No finance subs','No original posts yet','No Frak references','No DMs']]
+    ]
+  },
+  5: {
+    title:'Week 5 · <span>First posts + start lurking target subs</span>',
+    cols:[
+      ['This week', ['Make 1 original post in a casual sub','Questions or discussions, not statements','Keep commenting 3–5/day','Begin lurking in r/smallbusiness, r/CFO']],
+      ['Study mode', ['Read top weekly posts in target subs','Note moderator behavior','Note what comments get upvoted','Read full sidebar rules of each']],
+      ['Hard NOs', ['No commenting in finance subs yet','No links to Frak','No cross-posting','No promotional language']]
+    ]
+  },
+  6: {
+    title:'Week 6 · <span>Build to 250+ karma</span>',
+    cols:[
+      ['This week', ['1–2 original posts in casual subs','3–5 daily comments across 5+ subs','Continue lurking finance subs','Begin drafting trial Tier 1 comments']],
+      ['Phase 3 gate', ['Target: 250+ total karma','Required minimum for finance sub posts','If at 200+, push through','If at 150−, extend Phase 3 by 1 week']],
+      ['Still NOT doing', ['No commenting in finance subs','No mentioning of Frak','No team members upvoting','No DM outreach']]
+    ]
+  },
+  7: {
+    title:'Week 7 · <span>First comments in finance subs</span>',
+    cols:[
+      ['This week', ['2–3 substantive comments in Tier 1 subs','4–8 sentences, specific to the asker','Show operator expertise without overclaiming','Keep casual sub activity in parallel']],
+      ['What to write about', ['Cash flow, bookkeeping, exit prep','Topics where Frak has real expertise','Pick threads you genuinely care about','Specific advice with numbers when possible']],
+      ['Hard NOs', ['NO Frak link. NO Frak mention.','Even if asked, only "I run a fractional CFO firm"','No DMs as follow-up','No "check out my firm" anywhere']]
+    ]
+  },
+  8: {
+    title:'Week 8 · <span>Build to 400+ karma — prepare for Phase 5</span>',
+    cols:[
+      ['This week', ['Increase Tier 1 commenting to 3–4/week','Maintain casual sub activity','Track which comments get most engagement','Draft Phase 5 disclosure language']],
+      ['Phase 4 gate', ['Target: 400+ total karma','Account ready for branded engagement','Voice should feel natural by now','Health checks passing']],
+      ['Coming next', ['Phase 5 starts Week 9','95/5 ratio — Frak mentions only when invited','Always lead with disclosure','One Frak mention per sub per 2–3 weeks max']]
+    ]
+  }
+};
+
+const HERO_BOXES = (d) => [
+  {l:'Phase', v:'P'+d.currentPhase.id+' · '+d.currentPhase.name.split(' ')[0], sub:d.currentPhase.weeks+' of 8 warm-up weeks', tag:(d.status==='live'?'active':'holding'), tagL:(d.status==='live'?'Active':'Holding'), cur:true},
+  {l:'Day in Campaign', v:d.status==='prelaunch'?'Day 0':'Day '+d.day, mono:true, sub:d.status==='prelaunch'?'Pre-launch · awaiting kickoff':'Active campaign', tag:(d.status==='prelaunch'?'holding':'ok'), tagL:(d.status==='prelaunch'?'Holding':'Live')},
+  {l:'Karma Total', v:d.karma+' / 400+', mono:true, sub:'Target by end of P4 (Wk 8)', tag:(d.karma>=400?'ok':(d.karma>0?'active':'ready')), tagL:(d.karma>=400?'Hit':(d.karma>0?'Growing':'Ready to start'))},
+  {l:'Account Health', v:d.health==='ok'?'✓ Healthy':(d.health==='watch'?'Watch':(d.health==='risk'?'⚠ Risk':'—')), sub:d.health?'Last check this week':'No activity yet to monitor', tag:(d.health==='ok'?'ok':(d.health==='watch'?'warn':(d.health==='risk'?'warn':'holding'))), tagL:(d.health==='ok'?'OK':(d.health==='watch'?'Watch':(d.health==='risk'?'At risk':'Not yet live')))},
+  {l:'Subreddits Joined', v:d.subs+' / 14', mono:true, sub:'12–15 target list at kickoff', tag:(d.subs>=12?'ok':(d.subs>0?'active':'ready')), tagL:(d.subs>=12?'Complete':(d.subs>0?'In progress':'Planned'))},
+  {l:'Next Milestone', v:nextMilestone(d), sub:nextMilestoneDesc(d), tag:'ready', tagL:nextMilestoneTag(d)}
+];
+
+function nextMilestone(d){
+  const p = d.currentPhase;
+  if(p.id===1) return 'P2 · Wk 3';
+  if(p.id===2) return '100+ karma';
+  if(p.id===3) return '250+ karma';
+  if(p.id===4) return '400+ karma';
+  return 'M3 · DMs';
+}
+function nextMilestoneDesc(d){
+  const p = d.currentPhase;
+  if(p.id===1) return 'First comments in casual subs';
+  if(p.id===2) return 'Phase 2 → Phase 3 gate';
+  if(p.id===3) return 'Phase 3 → Phase 4 gate';
+  if(p.id===4) return 'Phase 4 → Phase 5 gate';
+  return 'First inbound DMs expected';
+}
+function nextMilestoneTag(d){
+  if(d.status==='prelaunch') return 'In 2 weeks';
+  const p = d.currentPhase;
+  if(p.id<5) return 'In progress';
+  return 'Tracking';
+}
+
+/* ============ STATE ============ */
+let state = loadData();
+
+function loadData(){
+  try {
+    const saved = localStorage.getItem('frakRedditDashboard');
+    if(saved){
+      return {...DEFAULTS, ...JSON.parse(saved)};
+    }
+  } catch(e){}
+  return {...DEFAULTS};
+}
+
+function persist(){
+  try {
+    localStorage.setItem('frakRedditDashboard', JSON.stringify(state));
+  } catch(e){
+    console.warn('Could not persist:', e);
+  }
+}
+
+/* ============ COMPUTED STATE ============ */
+function computeState(){
+  state.currentPhase = PHASE_GATES.find(p => {
+    if(state.status==='prelaunch') return p.id===1;
+    if(p.id===5) return state.day>=p.dayMin;
+    return state.day>=p.dayMin && state.day<p.dayMax;
+  }) || PHASE_GATES[0];
+
+  state.currentWeek = Math.min(8, Math.max(1, Math.ceil(state.day/7) || 1));
+  if(state.status==='prelaunch') state.currentWeek = 1;
+}
+
+/* ============ ANIMATIONS ============ */
+function animateNumber(el, target, duration=800){
+  if(!el) return;
+  const start = parseFloat(el.dataset.val || 0);
+  const targetN = parseFloat(target) || 0;
+  if(start===targetN){ el.textContent = target; return; }
+  const startTime = performance.now();
+  function step(now){
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed/duration, 1);
+    const eased = 1 - Math.pow(1-progress, 3);
+    const current = start + (targetN-start)*eased;
+    if(Number.isInteger(targetN)){
+      el.textContent = Math.round(current);
+    } else {
+      el.textContent = current.toFixed(1);
+    }
+    if(progress<1) requestAnimationFrame(step);
+    else { el.textContent = target; el.dataset.val = targetN; }
+  }
+  requestAnimationFrame(step);
+}
+
+/* ============ RENDERERS ============ */
+function renderHero(){
+  const strip = document.getElementById('heroStrip');
+  const boxes = HERO_BOXES(state);
+  strip.innerHTML = boxes.map(b => `
+    <div class="hm-box ${b.cur?'cur':''}">
+      <div class="hm-l">${b.l}</div>
+      <div class="hm-v ${b.mono?'mono':''}">${b.v}</div>
+      <div class="hm-sub">${b.sub}</div>
+      <span class="hm-tag ${b.tag}">${b.tagL}</span>
+    </div>
+  `).join('');
+
+  // Update top bar status
+  document.getElementById('lastUpdated').textContent = state.lastUpdated
+    ? 'Last updated: ' + new Date(state.lastUpdated).toLocaleString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})
+    : 'Last updated: never';
+
+  // Update banner
+  const banner = document.getElementById('statusBanner');
+  if(state.status==='live'){
+    banner.classList.add('live');
+    document.getElementById('bannerT').textContent = 'Live · campaign active';
+    document.getElementById('bannerD').textContent = `Day ${state.day} · Phase ${state.currentPhase.id} · Updated ${new Date(state.lastUpdated).toLocaleDateString()}`;
+  } else {
+    banner.classList.remove('live');
+    document.getElementById('bannerT').textContent = 'Pre-launch state — awaiting kickoff';
+    document.getElementById('bannerD').textContent = 'All numbers below are targets/projections. Once execution begins, this dashboard reflects actuals.';
+  }
+}
+
+function renderMissionControl(){
+  // Current phase title
+  document.getElementById('currentPhaseTitle').textContent = `Phase ${state.currentPhase.id} · ${state.currentPhase.name}`;
+  document.getElementById('currentPhaseDesc').textContent = state.currentPhase.desc;
+
+  // MC stats — adapt to current phase
+  const p = state.currentPhase;
+  let stats;
+  if(p.id===1){
+    stats = [
+      {l:'Days into Phase', v:Math.min(state.day,14)+' / 14', s:state.status==='prelaunch'?'Awaiting account creation':'In lurker mode'},
+      {l:'Subs Joined', v:state.subs+' / 14', s:'Tier 1 + Tier 3 mix planned'},
+      {l:'Daily Browse Target', v:'15 min', s:'5–10 upvotes / session'},
+      {l:'Posts Allowed', v:'0', s:'Reads only — that\'s the rule'}
+    ];
+  } else if(p.id===2){
+    stats = [
+      {l:'Days into Phase', v:Math.min(state.day-14,14)+' / 14', s:'Phase 2 of 5'},
+      {l:'Karma Total', v:state.karma+' / 100+', s:'Phase 2 gate'},
+      {l:'Comments This Week', v:state.comments, s:'Target 2–4/day'},
+      {l:'Active Subs', v:'Casual only', s:'No finance subs yet'}
+    ];
+  } else if(p.id===3){
+    stats = [
+      {l:'Days into Phase', v:Math.min(state.day-28,14)+' / 14', s:'Phase 3 of 5'},
+      {l:'Karma Total', v:state.karma+' / 250+', s:'Phase 3 gate'},
+      {l:'Posts This Week', v:state.posts, s:'Target 1–2/week'},
+      {l:'Tier 1 Lurking', v:'Active', s:'Read-only mode'}
+    ];
+  } else if(p.id===4){
+    stats = [
+      {l:'Days into Phase', v:Math.min(state.day-42,14)+' / 14', s:'Phase 4 of 5'},
+      {l:'Karma Total', v:state.karma+' / 400+', s:'Phase 4 gate'},
+      {l:'Tier 1 Comments', v:state.comments, s:'Target 2–3/week'},
+      {l:'Frak Mentions', v:'0', s:'Still no mentions allowed'}
+    ];
+  } else {
+    stats = [
+      {l:'Days into Phase', v:'Day '+(state.day-56), s:'Phase 5 · ongoing'},
+      {l:'Karma Total', v:state.karma, s:'Compounding'},
+      {l:'Inbound DMs', v:state.dms, s:'Cumulative'},
+      {l:'Discovery Calls', v:state.calls, s:'Attributed to Reddit'}
+    ];
+  }
+  document.getElementById('mcStats').innerHTML = stats.map(s => `
+    <div class="mc-stat">
+      <div class="mc-stat-l">${s.l}</div>
+      <div class="mc-stat-v">${s.v}</div>
+      <div class="mc-stat-s">${s.s}</div>
+    </div>
+  `).join('');
+
+  // Phase rail
+  document.getElementById('phaseRail').innerHTML = PHASE_GATES.map(p => {
+    let cls = '';
+    if(p.id < state.currentPhase.id) cls = 'done';
+    else if(p.id === state.currentPhase.id) cls = 'cur';
+    return `
+      <div class="phase-cell ${cls}">
+        <div class="phase-w">Wk ${p.weeks}</div>
+        <div class="phase-l">P${p.id} · ${p.name.split(' ')[0]}</div>
+        <div class="phase-n">${shortPhaseDesc(p.id)}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Week panel
+  const wk = WEEK_RUNSHEETS[state.currentWeek] || WEEK_RUNSHEETS[1];
+  document.getElementById('weekTitle').innerHTML = wk.title;
+  document.getElementById('weekMeta').textContent = `PHASE ${state.currentPhase.id} · DAY ${Math.max(1,state.day-((state.currentWeek-1)*7))} OF 7`;
+  document.getElementById('weekCols').innerHTML = wk.cols.map(([h,items]) => `
+    <div class="week-col">
+      <h4>${h}</h4>
+      <ul>${items.map(i=>`<li>${i}</li>`).join('')}</ul>
+    </div>
+  `).join('');
+
+  // Phase progress bars
+  document.getElementById('phaseProgressTitle').textContent = `Phase ${state.currentPhase.id} of 5`;
+  document.getElementById('phaseProgress').innerHTML = renderPhaseProgress();
+}
+
+function shortPhaseDesc(id){
+  return ({
+    1:'Browse, upvote, read rules. Zero posts.',
+    2:'Casual subs only. Target 100+ karma.',
+    3:'Discussions in casual subs. 250+ karma.',
+    4:'Tier 1 comments. No Frak mention. 400+ karma.',
+    5:'95/5 ratio. Strategic Frak mentions only.'
+  })[id];
+}
+
+function renderPhaseProgress(){
+  const p = state.currentPhase;
+  let rows;
+  if(p.id===1){
+    const dayPct = Math.min(state.day/14*100, 100);
+    const subPct = Math.min(state.subs/14*100, 100);
+    const lurkPct = Math.min(state.lurked/14*100, 100);
+    rows = [
+      {l:'Days lurked', pct:lurkPct, val:`${state.lurked} / 14`},
+      {l:'Subs joined', pct:subPct, val:`${state.subs} / 14`, cls:'gd'},
+      {l:'Days in phase', pct:dayPct, val:`${Math.min(state.day,14)} / 14`, cls:'ok'},
+      {l:'Profile setup', pct:state.day>0?100:0, val:state.day>0?'5 / 5':'0 / 5', cls:'warn'}
+    ];
+  } else {
+    const target = p.karmaTarget || 100;
+    const karmaPct = Math.min(state.karma/target*100, 100);
+    rows = [
+      {l:'Karma toward gate', pct:karmaPct, val:`${state.karma} / ${target}+`, cls:'gd'},
+      {l:'Comments this week', pct:Math.min(state.comments/20*100,100), val:`${state.comments}`, cls:'ok'},
+      {l:'Posts this week', pct:Math.min(state.posts/4*100,100), val:`${state.posts}`},
+      {l:'Phase day', pct:Math.min((state.day-p.dayMin)/(p.dayMax-p.dayMin)*100,100), val:`Day ${state.day-p.dayMin} / ${p.dayMax-p.dayMin}`, cls:'warn'}
+    ];
+  }
+  return rows.map(r => `
+    <div class="bar-row">
+      <div class="bar-label">${r.l}</div>
+      <div class="bar-track"><div class="bar-fill ${r.cls||''}" style="width:${r.pct}%"></div></div>
+      <div class="bar-val">${r.val}</div>
+    </div>
+  `).join('') + `
+    <div class="explain">
+      <div class="explain-t">Phase ${p.id} gate</div>
+      <div class="explain-b">${gateText(p)}</div>
+    </div>
+  `;
+}
+
+function gateText(p){
+  if(p.id===1) return 'Move to Phase 2 only after <strong>14 days of consistent lurking</strong>, profile fully set up, and all subreddit rules read. Rushing this is the most common cause of immediate shadowbans.';
+  if(p.id===5) return 'Steady-state. Maintain 95/5 ratio. Continue tracking karma growth, DM volume, and AI search visibility.';
+  return `Move to Phase ${p.id+1} only after hitting <strong>${p.karmaTarget}+ karma</strong> and completing ${p.dayMax-p.dayMin} days in this phase.`;
+}
+
+function renderTimeline(){
+  const rail = document.getElementById('tlRail');
+  const weeks = [
+    {n:1, l:'Lurker mode'},{n:2, l:'Still lurking'},
+    {n:3, l:'First comments'},{n:4, l:'100+ karma'},
+    {n:5, l:'First posts'},{n:6, l:'250+ karma'},
+    {n:7, l:'Finance subs'},{n:8, l:'400+ karma'}
+  ];
+  rail.innerHTML = weeks.map(w => {
+    let cls = 'up';
+    if(w.n < state.currentWeek) cls = 'done';
+    else if(w.n === state.currentWeek) cls = 'cur';
+    return `<div class="tl-week ${cls}"><div class="tl-dot"></div><div class="tl-w">Wk ${w.n}</div><div class="tl-l">${w.l}</div></div>`;
+  }).join('');
+
+  // Fill bar
+  const fillPct = ((state.currentWeek-1)/7)*88;
+  document.getElementById('tlFill').style.width = fillPct+'%';
+}
+
+function renderPhaseCards(){
+  const container = document.getElementById('phaseCardsContainer');
+  const data = [
+    {
+      id:1, name:'Lurker Mode', weeks:'WEEKS 1–2',
+      todo:['Create account from home IP, consistent device','Add profile photo, display name, short bio','Subscribe to 12–15 subreddits (Tier 1 mix)','Browse 10–15 min daily','Upvote 5–10 posts/comments per session','Read the rules page of every sub joined'],
+      nono:['No posting. None. Zero.','No commenting, even single-word ones','No DMs to anyone, even friendly','No repeated bio edits','No switching devices or networks','No mention of finance, CFO, Frak — anywhere'],
+      goal:'14 days', goalDesc:'Active account, profile complete, zero red flags, all rules pages read.',
+      note:'<strong>Karma target:</strong> 0. Zero activity is the entire point.'
+    },
+    {
+      id:2, name:'First Comments — Casual Subs Only', weeks:'WEEKS 3–4',
+      todo:['2–4 comments per day in casual subs only','Comments short (2–5 sentences), conversational','Sound like a real person — typos and slang OK','Reply when others respond — 2-way matters','Continue daily browsing and upvoting'],
+      nono:['No commenting in any finance subreddit yet','No links of any kind','No polished, structured-looking comments','No mentions of finance, CFO, bookkeeping, exits','No copy-pasting comments across threads'],
+      goal:'100+', goalDesc:'Threshold that bypasses most automatic spam filters in larger subs.'
+    },
+    {
+      id:3, name:'First Posts + Lurking Target Subs', weeks:'WEEKS 5–6',
+      todo:['1–2 original posts/week (questions, discussions)','3–5 comments/day across 5+ subreddits','Start lurking in Tier 1 finance subs — read only','Study what gets upvoted in those subs','Note who the active moderators are'],
+      nono:['No commenting in finance subs yet','No posts in finance subs','No Frak references anywhere','No cross-posting the same content'],
+      goal:'250+', goalDesc:'Required minimum to post threads in most Tier 1 subs without auto-removal.'
+    },
+    {
+      id:4, name:'First Comments in Finance Subs', weeks:'WEEKS 7–8 · NO FRAK MENTIONS',
+      todo:['2–3 substantive comments/week in Tier 1 subs','4–8 sentence comments, specific to the asker','Show operator expertise without overclaiming','Keep casual sub activity in parallel','If asked, say "I run a fractional CFO firm" — stop there'],
+      nono:['No link to Frak. Not even hinted','No detailed Frak pitch in DMs','No "check out my firm" framing of any kind','No talking only about finance — keep some casual subs alive'],
+      goal:'400+', goalDesc:'Account is now established enough to handle occasional Frak mentions safely.'
+    },
+    {
+      id:5, name:'Strategic Frak Mentions — 95/5 Ratio', weeks:'WEEK 9 ONWARD',
+      todo:['95% of activity = pure help, zero Frak mention','5% = Frak only when contextually invited','Always lead with disclosure: "Full disclosure, I run..."','Maximum 1 Frak mention per sub per 2–3 weeks','Consider AMA in r/smallbusiness around Month 6'],
+      nono:['Never argue with downvoters','Never copy a Frak mention from one sub to another','Never delete a poorly-received comment — let it sit','Never DM cold "lead" pitches, ever'],
+      goal:'1–3', goalDesc:'First inbound DMs from Reddit users. Then 1–2 attributable inbound calls by Month 4–6.', goalL:'KPI TARGETS (M3–M6)'
+    }
+  ];
+
+  container.innerHTML = data.map(p => {
+    let cls = '';
+    let tag = '<span class="tg tg-nx">UPCOMING</span>';
+    if(p.id < state.currentPhase.id){ cls='done'; tag='<span class="tg tg-go">COMPLETE</span>'; }
+    else if(p.id === state.currentPhase.id){ cls='cur'; tag='<span class="tg tg-go">ACTIVE</span>'; }
+    if(p.id===5 && state.currentPhase.id<5) tag='<span class="tg tg-pr">FUTURE</span>';
+
+    return `
+      <div class="phase-card ${cls}">
+        <div class="phase-hd">
+          <div class="phase-hd-l">
+            <div class="phase-num">P${p.id}</div>
+            <div>
+              <div class="phase-hd-title">${p.name}</div>
+              <div class="phase-hd-sub">${p.weeks} · ${p.id===state.currentPhase.id?'CURRENT PHASE':(p.id<state.currentPhase.id?'COMPLETE':'UPCOMING')}</div>
+            </div>
+          </div>
+          ${tag}
+        </div>
+        <div class="phase-body">
+          <div class="phase-cols">
+            <div class="phase-col">
+              <h5>What to do</h5>
+              <ul class="task-list do">${p.todo.map(t=>`<li onclick="this.classList.toggle('checked')">${t}</li>`).join('')}</ul>
+            </div>
+            <div class="phase-col">
+              <h5>What NOT to do</h5>
+              <ul class="task-list">${p.nono.map(t=>`<li>${t}</li>`).join('')}</ul>
+            </div>
+            <div class="phase-col">
+              <h5>Phase gate</h5>
+              <div class="goal-pod">
+                <div class="goal-pod-l">${p.goalL || (p.id===5?'TARGETS':(p.id===1?'EXIT CRITERIA':'KARMA TARGET'))}</div>
+                <div class="goal-pod-v">${p.goal}</div>
+                <div class="goal-pod-s">${p.goalDesc}</div>
+              </div>
+              ${p.note?`<div class="note" style="margin-top:10px">${p.note}</div>`:''}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderKPIs(){
+  const strip = document.getElementById('kpiStrip');
+  const kpis = [
+    {l:'KARMA · TOTAL', v:state.karma, target:'Target M6 · 1,500+', proj:[0.05, 0.12, 0.22, 0.35, 0.50, 0.68, 0.84, 1.0]},
+    {l:'COMMENTS / WEEK', v:state.comments, target:'Target steady-state · 4–8', proj:[0.05, 0.20, 0.45, 0.70, 0.85, 0.90, 0.90, 0.90]},
+    {l:'INBOUND DMs', v:state.dms, target:'First DM expected · M3–M4', proj:[0.05, 0.05, 0.18, 0.35, 0.55, 0.75, 0.90, 1.0]},
+    {l:'ATTRIBUTED CALLS', v:state.calls, target:'First call expected · M4–M6', proj:[0.05, 0.05, 0.05, 0.25, 0.45, 0.65, 0.85, 1.0]}
+  ];
+  const labels = [['M1','M2','M3','M4','M5','M6','M7','M8'],['W2','W4','W6','W8','M3','M4','M5','M6'],['M1','M2','M3','M4','M5','M6','M7','M8'],['M1','M2','M3','M4','M5','M6','M7','M8']];
+
+  strip.innerHTML = kpis.map((k,idx) => `
+    <div class="kpi">
+      <div class="kpi-l">${k.l}</div>
+      <div class="kpi-v"><span class="num-animate" data-target="${k.v}">${k.v}</span></div>
+      <div class="kpi-target">${k.target}</div>
+      <div class="mini-bars">
+        ${k.proj.map((h,i) => {
+          const isCurrent = state.day>0 && Math.floor(state.day/30)===i;
+          const isActual = state.day>0 && Math.floor(state.day/30)>=i;
+          return `<div class="mini-bar ${isActual?'act':'proj'} ${isCurrent?'cur':''}" style="height:${Math.max(h*100,5)}%"></div>`;
+        }).join('')}
+      </div>
+      <div class="mini-labels">${labels[idx].map(l=>`<div>${l}</div>`).join('')}</div>
+    </div>
+  `).join('');
+
+  // Animate numbers
+  strip.querySelectorAll('.num-animate').forEach(el => {
+    animateNumber(el, el.dataset.target, 700);
+  });
+}
+
+/* ============ RENDER ============ */
+function render(){
+  computeState();
+  renderHero();
+  renderMissionControl();
+  renderTimeline();
+  renderPhaseCards();
+  renderKPIs();
+  persist();
+}
+
+/* ============ TABS ============ */
+function t(el, id){
+  document.querySelectorAll('.tb-b').forEach(b => b.classList.remove('act'));
+  document.querySelectorAll('.tc').forEach(c => c.classList.remove('act'));
+  el.classList.add('act');
+  document.getElementById(id).classList.add('act');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ============ EDITOR ============ */
+function openEditor(){
+  document.getElementById('f_status').value = state.status;
+  document.getElementById('f_day').value = state.day || '';
+  document.getElementById('f_karma').value = state.karma || '';
+  document.getElementById('f_subs').value = state.subs || '';
+  document.getElementById('f_lurked').value = state.lurked || '';
+  document.getElementById('f_comments').value = state.comments || '';
+  document.getElementById('f_posts').value = state.posts || '';
+  document.getElementById('f_dms').value = state.dms || '';
+  document.getElementById('f_visits').value = state.visits || '';
+  document.getElementById('f_referrals').value = state.referrals || '';
+  document.getElementById('f_calls').value = state.calls || '';
+  document.getElementById('f_health').value = state.health;
+  document.getElementById('f_notes').value = state.notes || '';
+
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('editor').classList.add('open');
+}
+
+function closeEditor(){
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('editor').classList.remove('open');
+}
+
+function saveData(){
+  state = {
+    ...state,
+    status: document.getElementById('f_status').value,
+    day: parseInt(document.getElementById('f_day').value) || 0,
+    karma: parseInt(document.getElementById('f_karma').value) || 0,
+    subs: parseInt(document.getElementById('f_subs').value) || 0,
+    lurked: parseInt(document.getElementById('f_lurked').value) || 0,
+    comments: parseInt(document.getElementById('f_comments').value) || 0,
+    posts: parseInt(document.getElementById('f_posts').value) || 0,
+    dms: parseInt(document.getElementById('f_dms').value) || 0,
+    visits: parseInt(document.getElementById('f_visits').value) || 0,
+    referrals: parseInt(document.getElementById('f_referrals').value) || 0,
+    calls: parseInt(document.getElementById('f_calls').value) || 0,
+    health: document.getElementById('f_health').value,
+    notes: document.getElementById('f_notes').value,
+    lastUpdated: Date.now()
+  };
+  render();
+  closeEditor();
+  toast('Saved · dashboard updated');
+}
+
+function resetData(){
+  if(!confirm('Reset all data? This cannot be undone.')) return;
+  state = {...DEFAULTS};
+  localStorage.removeItem('frakRedditDashboard');
+  render();
+  closeEditor();
+  toast('Reset to defaults');
+}
+
+function exportData(){
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `frak-reddit-dashboard-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Exported to JSON');
+}
+
+/* ============ TOAST ============ */
+function toast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2400);
+}
+
+/* ============ INIT ============ */
+render();
+</script>
+
+</body>
+</html>
